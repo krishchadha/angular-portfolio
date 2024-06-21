@@ -1,9 +1,6 @@
 pipeline {
     agent any
-   tools {
-        nodejs "NodeJS LTS" 
-    }
-  
+
     environment {
         AWS_CREDENTIALS_ID = 'aws_full'
         S3_BUCKET = 'krishchadha'
@@ -11,18 +8,32 @@ pipeline {
         SLACK_WEBHOOK_CREDENTIAL_ID = 'slack'
     }
 
+    tools {
+        nodejs "NodeJS LTS"
+    }
+
     stages {
-        stage('Build') {
+        stage('Install Dependencies') {
             steps {
+                echo 'Starting npm install...'
                 sh 'npm install'
+                echo 'npm install completed.'
+            }
+        }
+
+        stage('Build Application') {
+            steps {
+                echo 'Starting npm run build...'
                 sh 'npm run build'
+                echo 'npm run build completed.'
             }
         }
 
         stage('Dockerize') {
             steps {
                 script {
-                    docker.build("my-angular-app:${env.BUILD_ID}")
+                    def appImage = docker.build("my-angular-app:${env.BUILD_ID}")
+                    appImage.push('latest')
                 }
             }
         }
