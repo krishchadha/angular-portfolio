@@ -2,40 +2,53 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
-        AWS_CREDENTIALS = credentials('aws-credentials')
+        AWS_CREDENTIALS_ID = 'aws_full'
+        S3_BUCKET = 'krishchadha'
+        SLACK_CHANNEL = '#website'
+        SLACK_WEBHOOK_CREDENTIAL_ID = 'slack'
     }
 
     stages {
-        stage('Clone Repository') {
+        stage('Build') {
             steps {
-                git 'https://github.com/your-repo/angular-portfolio.git'
+                sh 'npm install'
+                sh 'npm run build'
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Test') {
+            steps {
+                sh 'npm run test'
+                // OWASP ZAP Scan (example command)
+                sh 'owasp-zap -cmd'
+            }
+        }
+
+        stage('Dockerize') {
             steps {
                 script {
-                    docker.build('angular-portfolio')
+                    docker.build("my-angular-app:${env.BUILD_ID}")
                 }
             }
         }
 
-        stage('Push Docker Image') {
+        stage('Deploy to S3') {
             steps {
-                script {
-                    docker.withRegistry('https://registry.hub.docker.com', 'DOCKERHUB_CREDENTIALS') {
-                        docker.image('angular-portfolio').push('latest')
-                    }
+                withAWS(credentials: env.AWS_CREDENTIALS_ID, region: 'ap-south-1') {
+                    s3Upload(bucket: env.S3_BUCKET, includePathPattern: 'dist/**')
                 }
             }
         }
 
-        stage('Deploy to Kubernetes') {
+        stage('Notify') {
             steps {
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials']]) {
-                    sh 'kubectl apply -f kubernetes/deployment.yaml'
-                    sh 'kubectl apply -f kubernetes/service.yaml'
+                script {
+                    slackSend (
+                        channel: env.SLACK_CHANNEL,
+                        color: '#00FF00',
+                        message: "Deployment completed for build ${env.BUILD_ID}",
+                        tokenCredentialId: env.SLACK_WEBHOOK_CREDENTIAL_ID
+                    )
                 }
             }
         }
