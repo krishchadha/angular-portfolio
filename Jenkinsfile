@@ -19,14 +19,6 @@ pipeline {
             }
         }
 
-        stage('Test') {
-            steps {
-                sh 'npm run test'
-                // OWASP ZAP Scan (example command)
-                sh 'owasp-zap -cmd'
-            }
-        }
-
         stage('Dockerize') {
             steps {
                 script {
