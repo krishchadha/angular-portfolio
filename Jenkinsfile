@@ -1,9 +1,6 @@
 pipeline {
     agent any
-  tools {
-        nodejs "NodeJS LTS" // Use the Node.js installation defined in Global Tool Configuration
-    }
-
+  
     environment {
         AWS_CREDENTIALS_ID = 'aws_full'
         S3_BUCKET = 'krishchadha'
