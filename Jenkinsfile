@@ -1,5 +1,8 @@
 pipeline {
     agent any
+   tools {
+        nodejs "NodeJS LTS" 
+    }
   
     environment {
         AWS_CREDENTIALS_ID = 'aws_full'
