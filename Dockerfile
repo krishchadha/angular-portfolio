@@ -8,6 +8,7 @@ RUN npm run build --prod
 
 # Stage 2: Production Stage
 FROM nginx:alpine
+RUN rm -rf /usr/share/nginx/html/*
 COPY --from=build /app/dist/angular-portfolio /usr/share/nginx/html
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
