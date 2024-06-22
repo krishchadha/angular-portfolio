@@ -6,12 +6,12 @@ pipeline {
         S3_BUCKET = 'krishchadha'
         SLACK_CHANNEL = '#website'
         SLACK_WEBHOOK_CREDENTIAL_ID = 'slack'
-        GIT_TOOL = 'Git'
+
     }
 
     tools {
         nodejs "NodeJS_LTS"
-        git GIT_TOOL
+
     }
 
     stages {
