@@ -54,7 +54,7 @@ pipeline {
 
                 // Copy build files to S3 bucket
                 bat '''
-                    aws s3 cp dist/ s3://%S3_BUCKET%/ --recursive --acl public-read
+                    aws s3 cp dist/ s3://%S3_BUCKET%/ --recursive
                 '''
             }
         }
