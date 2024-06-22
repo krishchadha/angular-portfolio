@@ -3,10 +3,12 @@ pipeline {
 
     environment {
         AWS_CREDENTIALS_ID = 'aws_full_2'
-        S3_BUCKET = 'krishchadha'
+     //   S3_BUCKET = 'krishchadha'
         SLACK_CHANNEL = '#website'
         SLACK_WEBHOOK_CREDENTIAL_ID = 'slack'
         DOCKER_HUB_CREDENTIAL_ID = 'docker'
+       AWS_REGION = 'ap-south-1'
+        S3_BUCKET = 'krishchadha.s3-website.ap-south-1.amazonaws.com'
     }
 
     tools {
