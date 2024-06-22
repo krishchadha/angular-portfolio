@@ -6,19 +6,18 @@ pipeline {
         S3_BUCKET = 'krishchadha'
         SLACK_CHANNEL = '#website'
         SLACK_WEBHOOK_CREDENTIAL_ID = 'slack'
-
+        DOCKER_HUB_CREDENTIAL_ID = 'docker' 
     }
 
     tools {
         nodejs "NodeJS_LTS"
-
     }
 
     stages {
         stage('Install Dependencies') {
             steps {
                 echo 'Starting npm install...'
-                bat 'npm install'  // Use 'bat' instead of 'sh' for Windows
+                bat 'npm install'
                 echo 'npm install completed.'
             }
         }
@@ -26,17 +25,18 @@ pipeline {
         stage('Build Application') {
             steps {
                 echo 'Starting npm run build...'
-                bat 'npm run build'  // Use 'bat' instead of 'sh' for Windows
+                bat 'npm run build'
                 echo 'npm run build completed.'
             }
         }
 
         stage('Dockerize') {
             steps {
-                // Adjust Docker commands for Windows compatibility
                 script {
                     def appImage = docker.build("my-angular-app:${env.BUILD_ID}")
-                    appImage.push('latest')
+                    docker.withRegistry('https://registry.hub.docker.com', env.DOCKER_HUB_CREDENTIAL_ID) {
+                        appImage.push('latest')
+                    }
                 }
             }
         }
