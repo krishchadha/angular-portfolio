@@ -11,7 +11,7 @@ pipeline {
 
     tools {
         nodejs "NodeJS_LTS"
-        git GIT_TOOL
+        git "GIT_TOOL"
     }
 
     stages {
