@@ -8,7 +8,7 @@ pipeline {
         SLACK_WEBHOOK_CREDENTIAL_ID = 'slack'
         DOCKER_HUB_CREDENTIAL_ID = 'docker'
        AWS_REGION = 'ap-south-1'
-        S3_BUCKET = 'krishchadha.s3-website.ap-south-1.amazonaws.com'
+        S3_BUCKET = 'krishchadha'
     }
 
     tools {
@@ -43,20 +43,24 @@ pipeline {
             }
         }
 
-        stage('Deploy to S3') {
-            steps {
-                script {
-                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: env.AWS_CREDENTIALS_ID]]) {
-                        s3Upload(
-                            bucket: env.S3_BUCKET,
-                            includePathPattern: 'dist/**',
-                            path: '',
-                            workingDir: ''
-                        )
-                    }
-                }
+    stage('Deploy to S3') {
+    steps {
+        script {
+            withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: env.AWS_CREDENTIALS_ID]]) {
+                // Install AWS CLI
+                bat 'curl "https://awscli.amazonaws.com/AWSCLIV2.msi" -o "AWSCLIV2.msi"'
+                bat 'msiexec.exe /i AWSCLIV2.msi /qn'
+                bat 'del AWSCLIV2.msi'  // Clean up the installer
+
+                // Copy build files to S3 bucket
+                bat '''
+                    aws s3 cp dist/ s3://%S3_BUCKET%/ --recursive --acl public-read
+                '''
             }
         }
+    }
+}
+
 
         stage('Notify') {
             steps {
