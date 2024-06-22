@@ -44,22 +44,12 @@ pipeline {
         stage('Deploy to S3') {
             steps {
                 script {
-                    def files = findFiles(glob: 'dist/**')
-                    for (file in files) {
-                        publishS3(
-                            artifacts: [[$class: 'FilePathArtifact', filePath: file.path]],
-                            bucket: env.S3_BUCKET,
-                            endpoint: "http://krishchadha.s3-website.ap-south-1.amazonaws.com",
-                            filesPath: 'dist/**',
-                            noUploadOnFailure: true,
-                            serverSideEncryption: false,
-                            selectedRegion: 'ap-south-1',
-                            storageClass: 'STANDARD',
-                            uploadFromSlave: false,
-                            useServerSideEncryption: false,
-                            versioning: false
-                        )
-                    }
+                    s3Upload(
+                        bucket: env.S3_BUCKET,
+                        includePathPattern: 'dist/**',
+                        path: '',
+                        workingDir: ''
+                    )
                 }
             }
         }
