@@ -9,7 +9,7 @@ pipeline {
     }
 
     tools {
-        nodejs "NodeJS LTS"
+        nodejs "NodeJS_LTS"
     }
 
     stages {
