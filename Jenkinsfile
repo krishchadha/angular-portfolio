@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        AWS_CREDENTIALS_ID = 'aws_full'
+        AWS_CREDENTIALS_ID = 'aws_full_2'
         S3_BUCKET = 'krishchadha'
         SLACK_CHANNEL = '#website'
         SLACK_WEBHOOK_CREDENTIAL_ID = 'slack'
