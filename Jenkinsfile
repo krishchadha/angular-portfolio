@@ -33,8 +33,8 @@ pipeline {
         stage('Dockerize') {
             steps {
                 script {
-                    def appImage = docker.build("my-angular-app:${env.BUILD_ID}")
-                    docker.withRegistry('https://registry.hub.docker.com', env.DOCKER_HUB_CREDENTIAL_ID) {
+                    def appImage = docker.build("krishchadha/angular-final:${env.BUILD_ID}")
+                    docker.withRegistry('https://index.docker.io/v1/', env.DOCKER_HUB_CREDENTIAL_ID) {
                         appImage.push('latest')
                     }
                 }
