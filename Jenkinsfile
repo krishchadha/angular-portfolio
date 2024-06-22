@@ -6,7 +6,7 @@ pipeline {
         S3_BUCKET = 'krishchadha'
         SLACK_CHANNEL = '#website'
         SLACK_WEBHOOK_CREDENTIAL_ID = 'slack'
-        DOCKER_HUB_CREDENTIAL_ID = 'docker' 
+        DOCKER_HUB_CREDENTIAL_ID = 'docker'
     }
 
     tools {
@@ -44,12 +44,14 @@ pipeline {
         stage('Deploy to S3') {
             steps {
                 script {
-                    s3Upload(
-                        bucket: env.S3_BUCKET,
-                        includePathPattern: 'dist/**',
-                        path: '',
-                        workingDir: ''
-                    )
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: env.AWS_CREDENTIALS_ID]]) {
+                        s3Upload(
+                            bucket: env.S3_BUCKET,
+                            includePathPattern: 'dist/**',
+                            path: '',
+                            workingDir: ''
+                        )
+                    }
                 }
             }
         }
