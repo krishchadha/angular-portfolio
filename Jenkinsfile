@@ -53,14 +53,13 @@ pipeline {
 
                         // Copy build files to S3 bucket
                         bat '''
-                            aws s3 sync dist/angular-final/ s3://%S3_BUCKET%/ --delete
+                            aws s3 cp dist/ s3://%S3_BUCKET%/ --recursive
                         '''
                     }
                 }
             }
         }
-
-        stage('Configure S3 Static Website Hosting') {
+   stage('Configure S3 Static Website Hosting') {
             steps {
                 script {
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: env.AWS_CREDENTIALS_ID]]) {
@@ -71,7 +70,6 @@ pipeline {
                 }
             }
         }
-
         stage('Notify') {
             steps {
                 script {
