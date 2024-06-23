@@ -3,12 +3,11 @@ pipeline {
 
     environment {
         AWS_CREDENTIALS_ID = 'aws_full_2'
-     //   S3_BUCKET = 'krishchadha'
+        S3_BUCKET = 'krishchadha'
         SLACK_CHANNEL = '#website'
         SLACK_WEBHOOK_CREDENTIAL_ID = 'slack'
         DOCKER_HUB_CREDENTIAL_ID = 'docker'
-       AWS_REGION = 'ap-south-1'
-        S3_BUCKET = 'krishchadha'
+        AWS_REGION = 'ap-south-1'
     }
 
     tools {
@@ -43,24 +42,35 @@ pipeline {
             }
         }
 
-    stage('Deploy to S3') {
-    steps {
-        script {
-            withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: env.AWS_CREDENTIALS_ID]]) {
-                // Install AWS CLI
-                bat 'curl "https://awscli.amazonaws.com/AWSCLIV2.msi" -o "AWSCLIV2.msi"'
-                bat 'msiexec.exe /i AWSCLIV2.msi /qn'
-                bat 'del AWSCLIV2.msi'  // Clean up the installer
+        stage('Deploy to S3') {
+            steps {
+                script {
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: env.AWS_CREDENTIALS_ID]]) {
+                        // Install AWS CLI
+                        bat 'curl "https://awscli.amazonaws.com/AWSCLIV2.msi" -o "AWSCLIV2.msi"'
+                        bat 'msiexec.exe /i AWSCLIV2.msi /qn'
+                        bat 'del AWSCLIV2.msi'  // Clean up the installer
 
-                // Copy build files to S3 bucket
-                bat '''
-                    aws s3 cp dist/ s3://%S3_BUCKET%/ --recursive
-                '''
+                        // Copy build files to S3 bucket
+                        bat '''
+                            aws s3 sync dist/angular-final/ s3://%S3_BUCKET%/ --delete
+                        '''
+                    }
+                }
             }
         }
-    }
-}
 
+        stage('Configure S3 Static Website Hosting') {
+            steps {
+                script {
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: env.AWS_CREDENTIALS_ID]]) {
+                        bat '''
+                            aws s3 website s3://%S3_BUCKET%/ --index-document index.html --error-document error.html
+                        '''
+                    }
+                }
+            }
+        }
 
         stage('Notify') {
             steps {
