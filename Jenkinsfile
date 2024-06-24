@@ -51,25 +51,35 @@ pipeline {
                         bat 'msiexec.exe /i AWSCLIV2.msi /qn'
                         bat 'del AWSCLIV2.msi'  // Clean up the installer
 
+                        // Print the directory structure for debugging
+                        bat 'dir dist\\angular-final\\browser'
+
                         // Copy build files to S3 bucket
                         bat '''
-                            aws s3 cp dist/angular-final/ s3://%S3_BUCKET%/ --recursive
+                            aws s3 cp dist/angular-final/browser/ s3://%S3_BUCKET%/ --recursive
+                        '''
+
+                        // List the files in the S3 bucket to ensure they are uploaded
+                        bat '''
+                            aws s3 ls s3://%S3_BUCKET%/
                         '''
                     }
                 }
             }
         }
-   stage('Configure S3 Static Website Hosting') {
+
+        stage('Configure S3 Static Website Hosting') {
             steps {
                 script {
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: env.AWS_CREDENTIALS_ID]]) {
                         bat '''
-                            aws s3 website s3://%S3_BUCKET%/browser/ --index-document index.html --error-document error.html
+                            aws s3 website s3://%S3_BUCKET%/ --index-document browser/index.html --error-document browser/error.html
                         '''
                     }
                 }
             }
         }
+
         stage('Notify') {
             steps {
                 script {
