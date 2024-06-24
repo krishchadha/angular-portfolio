@@ -64,7 +64,7 @@ pipeline {
                 script {
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: env.AWS_CREDENTIALS_ID]]) {
                         bat '''
-                            aws s3 website s3://%S3_BUCKET%/ --index-document index.html --error-document error.html
+                            aws s3 website s3://%S3_BUCKET%/browser/ --index-document index.html --error-document error.html
                         '''
                     }
                 }
