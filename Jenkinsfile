@@ -3,8 +3,7 @@ pipeline {
 
     environment {
         AWS_CREDENTIALS_ID = 'aws_full_2'
-        S3_BUCKET = 'krishchadha.online'
-        S3_BUCKET_2 = 'www.krishchadha.online'
+        S3_BUCKET = 'www.krishchadha.online'
         SLACK_CHANNEL = '#website'
         SLACK_WEBHOOK_CREDENTIAL_ID = 'slack'
         DOCKER_HUB_CREDENTIAL_ID = 'docker'
@@ -59,15 +58,11 @@ pipeline {
                         bat '''
                             aws s3 cp dist/angular-final/browser/ s3://%S3_BUCKET%/ --recursive
                         '''
-                         bat '''
-                            aws s3 cp dist/angular-final/browser/ s3://%S3_BUCKET_2%/ --recursive
-                        '''
+                     
+                        
                         // List the files in the S3 bucket to ensure they are uploaded
                         bat '''
                             aws s3 ls s3://%S3_BUCKET%/
-                        '''
-                        bat '''
-                            aws s3 ls s3://%S3_BUCKET_2%/
                         '''
                     }
                 }
@@ -80,9 +75,6 @@ pipeline {
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: env.AWS_CREDENTIALS_ID]]) {
                         bat '''
                             aws s3 website s3://%S3_BUCKET%/ --index-document index.html --error-document error.html
-                        '''
-                        bat '''
-                            aws s3 website s3://%S3_BUCKET_2%/ --index-document index.html --error-document error.html
                         '''
                     }
                 }
