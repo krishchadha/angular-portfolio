@@ -8,7 +8,7 @@ pipeline {
         SLACK_WEBHOOK_CREDENTIAL_ID = 'slack'
         DOCKER_HUB_CREDENTIAL_ID = 'docker'
         AWS_REGION = 'ap-south-1'
-        SONAR_HOME = tool "Sonar"
+        SONAR_HOME = tool name: 'SonarQube', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
     }
 
     tools {
@@ -58,11 +58,22 @@ pipeline {
             parallel {
                 stage('SonarQube Quality Analysis') {
                     steps {
-                        withSonarQubeEnv("Sonar") {
-                            bat "$SONAR_HOME/bin/sonar-scanner -Dsonar.projectName=wanderlust -Dsonar.projectKey=wanderlust"
+                        script {
+                            try {
+                                echo "Running SonarQube analysis..."
+                                withSonarQubeEnv("SonarQube") {
+                                    bat "${env.SONAR_HOME}\\bin\\sonar-scanner.bat -Dsonar.projectName=wanderlust -Dsonar.projectKey=wanderlust"
+                                }
+                                echo "SonarQube analysis completed."
+                            } catch (Exception e) {
+                                echo "Error during SonarQube analysis: ${e.message}"
+                                currentBuild.result = 'FAILURE'
+                                throw e
+                            }
                         }
                     }
                 }
+
                 stage('OWASP Dependency Check') {
                     steps {
                         dependencyCheck additionalArguments: '--scan ./', odcInstallation: 'dc'
@@ -150,19 +161,6 @@ pipeline {
                 }
             }
         }
-
-    //     stage('Notify') {
-    //         steps {
-    //             script {
-    //                 slackSend (
-    //                     channel: env.SLACK_CHANNEL,
-    //                     color: '#00FF00',
-    //                     message: "Deployment completed for build ${env.BUILD_ID}",
-    //                     tokenCredentialId: env.SLACK_WEBHOOK_CREDENTIAL_ID
-    //                 )
-    //             }
-    //         }
-    //     }
     }
 
     post {
