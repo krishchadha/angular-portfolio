@@ -8,6 +8,7 @@ pipeline {
         SLACK_WEBHOOK_CREDENTIAL_ID = 'slack'
         DOCKER_HUB_CREDENTIAL_ID = 'docker'
         AWS_REGION = 'ap-south-1'
+        SONAR_HOME = tool "Sonar"
     }
 
     tools {
@@ -15,29 +16,93 @@ pipeline {
     }
 
     stages {
+        stage('Clone Code from GitHub') {
+            steps {
+                git url: "https://github.com/krishchadha/angular-portfolio.git", branch: "main"
+            }
+        }
+
         stage('Install Dependencies') {
             steps {
-                echo 'Starting npm install...'
-                bat 'npm install'
-                echo 'npm install completed.'
+                script {
+                    try {
+                        echo 'Starting npm install...'
+                        bat 'npm install'
+                        echo 'npm install completed.'
+                    } catch (Exception e) {
+                        echo "Error during npm install: ${e.message}"
+                        currentBuild.result = 'FAILURE'
+                        throw e
+                    }
+                }
             }
         }
 
         stage('Build Application') {
             steps {
-                echo 'Starting npm run build...'
-                bat 'npm run build'
-                echo 'npm run build completed.'
+                script {
+                    try {
+                        echo 'Starting npm run build...'
+                        bat 'npm run build'
+                        echo 'npm run build completed.'
+                    } catch (Exception e) {
+                        echo "Error during npm build: ${e.message}"
+                        currentBuild.result = 'FAILURE'
+                        throw e
+                    }
+                }
+            }
+        }
+
+        stage('Parallel Tasks') {
+            parallel {
+                stage('SonarQube Quality Analysis') {
+                    steps {
+                        withSonarQubeEnv("Sonar") {
+                            bat "$SONAR_HOME/bin/sonar-scanner -Dsonar.projectName=wanderlust -Dsonar.projectKey=wanderlust"
+                        }
+                    }
+                }
+                stage('OWASP Dependency Check') {
+                    steps {
+                        dependencyCheck additionalArguments: '--scan ./', odcInstallation: 'dc'
+                        dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+                        archiveArtifacts artifacts: '**/dependency-check-report.xml'
+                    }
+                }
+            }
+        }
+
+        stage('Sonar Quality Gate Scan') {
+            steps {
+                timeout(time: 2, unit: "MINUTES") {
+                    waitForQualityGate abortPipeline: false
+                }
             }
         }
 
         stage('Dockerize') {
             steps {
                 script {
-                    def appImage = docker.build("krishchadha/angular-final:${env.BUILD_ID}")
-                    docker.withRegistry('https://index.docker.io/v1/', env.DOCKER_HUB_CREDENTIAL_ID) {
-                        appImage.push('latest')
+                    try {
+                        def appImage = docker.build("krishchadha/angular-final:${env.BUILD_ID}")
+                        docker.withRegistry('https://index.docker.io/v1/', env.DOCKER_HUB_CREDENTIAL_ID) {
+                            appImage.push('latest')
+                        }
+                    } catch (Exception e) {
+                        echo "Error during Docker build/push: ${e.message}"
+                        currentBuild.result = 'FAILURE'
+                        throw e
                     }
+                }
+            }
+        }
+
+        stage('Trivy Docker Image Scan') {
+            steps {
+                script {
+                    bat "trivy image --format table -o trivy-docker-image-report.html krishchadha/angular-final:${env.BUILD_ID}"
+                    archiveArtifacts artifacts: 'trivy-docker-image-report.html'
                 }
             }
         }
@@ -45,25 +110,30 @@ pipeline {
         stage('Deploy to S3') {
             steps {
                 script {
-                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: env.AWS_CREDENTIALS_ID]]) {
-                        // Install AWS CLI
-                        bat 'curl "https://awscli.amazonaws.com/AWSCLIV2.msi" -o "AWSCLIV2.msi"'
-                        bat 'msiexec.exe /i AWSCLIV2.msi /qn'
-                        bat 'del AWSCLIV2.msi'  // Clean up the installer
+                    try {
+                        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: env.AWS_CREDENTIALS_ID]]) {
+                            // Install AWS CLI
+                            bat 'curl "https://awscli.amazonaws.com/AWSCLIV2.msi" -o "AWSCLIV2.msi"'
+                            bat 'msiexec.exe /i AWSCLIV2.msi /qn'
+                            bat 'del AWSCLIV2.msi'  // Clean up the installer
 
-                        // Print the directory structure for debugging
-                        bat 'dir dist\\angular-final\\browser'
+                            // Print the directory structure for debugging
+                            bat 'dir dist\\angular-final\\browser'
 
-                        // Copy build files to S3 bucket
-                        bat '''
-                            aws s3 cp dist/angular-final/browser/ s3://%S3_BUCKET%/ --recursive
-                        '''
-                     
-                        
-                        // List the files in the S3 bucket to ensure they are uploaded
-                        bat '''
-                            aws s3 ls s3://%S3_BUCKET%/
-                        '''
+                            // Copy build files to S3 bucket
+                            bat '''
+                                aws s3 cp dist/angular-final/browser/ s3://%S3_BUCKET%/ --recursive
+                            '''
+
+                            // List the files in the S3 bucket to ensure they are uploaded
+                            bat '''
+                                aws s3 ls s3://%S3_BUCKET%/
+                            '''
+                        }
+                    } catch (Exception e) {
+                        echo "Error during S3 deployment: ${e.message}"
+                        currentBuild.result = 'FAILURE'
+                        throw e
                     }
                 }
             }
@@ -81,23 +151,43 @@ pipeline {
             }
         }
 
-        stage('Notify') {
-            steps {
-                script {
-                    slackSend (
-                        channel: env.SLACK_CHANNEL,
-                        color: '#00FF00',
-                        message: "Deployment completed for build ${env.BUILD_ID}",
-                        tokenCredentialId: env.SLACK_WEBHOOK_CREDENTIAL_ID
-                    )
-                }
-            }
-        }
-    }
+    //     stage('Notify') {
+    //         steps {
+    //             script {
+    //                 slackSend (
+    //                     channel: env.SLACK_CHANNEL,
+    //                     color: '#00FF00',
+    //                     message: "Deployment completed for build ${env.BUILD_ID}",
+    //                     tokenCredentialId: env.SLACK_WEBHOOK_CREDENTIAL_ID
+    //                 )
+    //             }
+    //         }
+    //     }
+    // }
 
     post {
         always {
             cleanWs()
+        }
+        failure {
+            script {
+                slackSend (
+                    channel: env.SLACK_CHANNEL,
+                    color: '#FF0000',
+                    message: "Build failed for ${env.JOB_NAME} #${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)",
+                    tokenCredentialId: env.SLACK_WEBHOOK_CREDENTIAL_ID
+                )
+            }
+        }
+        success {
+            script {
+                slackSend (
+                    channel: env.SLACK_CHANNEL,
+                    color: '#00FF00',
+                    message: "Deployment completed for build ${env.BUILD_ID}",
+                    tokenCredentialId: env.SLACK_WEBHOOK_CREDENTIAL_ID
+                )
+            }
         }
     }
 }
