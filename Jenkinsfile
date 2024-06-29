@@ -8,7 +8,7 @@ pipeline {
         SLACK_WEBHOOK_CREDENTIAL_ID = 'slack'
         DOCKER_HUB_CREDENTIAL_ID = 'docker'
         AWS_REGION = 'ap-south-1'
-        SONAR_HOME = tool name: 'SonarQube', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
+        SONAR_HOME = tool name: 'SonarQube'
     }
 
     tools {
