@@ -62,7 +62,7 @@ pipeline {
                             try {
                                 echo "Running SonarQube analysis..."
                                 withSonarQubeEnv("SonarQube") {
-                                    bat "${env.SONAR_HOME}\\bin\\sonar-scanner.bat -Dsonar.projectName=wanderlust -Dsonar.projectKey=wanderlust"
+                                    bat "${env.SONAR_HOME}\\bin\\sonar-scanner.bat -Dsonar.projectName=portfolio -Dsonar.projectKey=portfolio"
                                 }
                                 echo "SonarQube analysis completed."
                             } catch (Exception e) {
