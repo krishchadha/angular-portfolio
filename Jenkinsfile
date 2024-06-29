@@ -61,7 +61,7 @@ pipeline {
                         script {
                             try {
                                 echo "Running SonarQube analysis..."
-                                withSonarQubeEnv("SonarQube") {
+                                withSonarQubeEnv("Sonar") {
                                     bat "${env.SONAR_HOME}\\bin\\sonar-scanner.bat -Dsonar.projectName=portfolio -Dsonar.projectKey=portfolio"
                                 }
                                 echo "SonarQube analysis completed."
