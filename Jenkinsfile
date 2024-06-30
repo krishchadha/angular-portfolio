@@ -53,23 +53,26 @@ pipeline {
                 }
             }
         }
-       // stage('SonarQube Quality Analysis') {
-       //              steps {
-       //                  script {
-       //                      try {
-       //                          echo "Running SonarQube analysis..."
-       //                          withSonarQubeEnv("Sonar") {
-       //                              bat "${env.SONAR_HOME}\\bin\\sonar-scanner.bat -Dsonar.projectName=portfolio -Dsonar.projectKey=portfolio"
-       //                          }
-       //                          echo "SonarQube analysis completed."
-       //                      } catch (Exception e) {
-       //                          echo "Error during SonarQube analysis: ${e.message}"
-       //                          currentBuild.result = 'FAILURE'
-       //                          throw e
-       //                      }
-       //                  }
-       //              }
-       //          }
+       stage('SonarQube Quality Analysis') {
+    steps {
+        script {
+            try {
+                echo "Running SonarQube analysis..."
+                docker.image('e581108bc249').inside {
+                    withSonarQubeEnv("Sonar") { 
+                        sh 'sonar-scanner -Dsonar.projectName=portfolio -Dsonar.projectKey=portfolio'
+                    }
+                }
+                echo "SonarQube analysis completed."
+            } catch (Exception e) {
+                echo "Error during SonarQube analysis: ${e.message}"
+                currentBuild.result = 'FAILURE'
+                throw e
+            }
+        }
+    }
+}
+
         // stage('OWASP Dependency Check') {
         //             steps {
         //                 dependencyCheck additionalArguments: '--scan ./', odcInstallation: 'Owasp'
@@ -103,14 +106,14 @@ pipeline {
             }
         }
 
-        stage('Trivy Docker Image Scan') {
-            steps {
-                script {
-                    cmd "trivy image --format table -o trivy-docker-image-report.html krishchadha/angular-final:${env.BUILD_ID}"
-                    archiveArtifacts artifacts: 'trivy-docker-image-report.html'
-                }
-            }
-        }
+        // stage('Trivy Docker Image Scan') {
+        //     steps {
+        //         script {
+        //             bat "trivy image --format table -o trivy-docker-image-report.html krishchadha/angular-final:${env.BUILD_ID}"
+        //             archiveArtifacts artifacts: 'trivy-docker-image-report.html'
+        //         }
+        //     }
+        // }
 
         stage('Deploy to S3') {
             steps {
