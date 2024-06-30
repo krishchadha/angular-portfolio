@@ -9,7 +9,7 @@ pipeline {
         DOCKER_HUB_CREDENTIAL_ID = 'docker'
         AWS_REGION = 'ap-south-1'
         SONAR_HOME = tool 'Sonar'
-       SONARQUBE_URL = 'http://localhost:9000'
+        SONARQUBE_URL = 'http://localhost:9000'
     }
 
     tools {
@@ -75,12 +75,12 @@ pipeline {
         }
 
 
-        // stage('OWASP Dependency Check') {
-        //             steps {
-        //                 dependencyCheck additionalArguments: '--scan ./', odcInstallation: 'Owasp'
-        //                 dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
-        //             }
-        //         }
+        stage('OWASP Dependency Check') {
+                    steps {
+                        dependencyCheck additionalArguments: '--scan ./', odcInstallation: 'Owasp'
+                        dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+                    }
+                }
 
 
         stage('Sonar Quality Gate Scan') {
