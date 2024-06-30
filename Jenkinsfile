@@ -8,7 +8,7 @@ pipeline {
         SLACK_WEBHOOK_CREDENTIAL_ID = 'slack'
         DOCKER_HUB_CREDENTIAL_ID = 'docker'
         AWS_REGION = 'ap-south-1'
-        SONAR_HOME = tool name: 'Sonar'
+        SONAR_HOME = tool 'Sonar'
     }
 
     tools {
@@ -53,10 +53,7 @@ pipeline {
                 }
             }
         }
-
-        stage('Parallel Tasks') {
-            parallel {
-                stage('SonarQube Quality Analysis') {
+       stage('SonarQube Quality Analysis') {
                     steps {
                         script {
                             try {
@@ -73,16 +70,13 @@ pipeline {
                         }
                     }
                 }
-
-                stage('OWASP Dependency Check') {
+        stage('OWASP Dependency Check') {
                     steps {
                         dependencyCheck additionalArguments: '--scan ./', odcInstallation: 'Owasp'
                         dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
-                        archiveArtifacts artifacts: '**/dependency-check-report.xml'
                     }
                 }
-            }
-        }
+
 
         stage('Sonar Quality Gate Scan') {
             steps {
