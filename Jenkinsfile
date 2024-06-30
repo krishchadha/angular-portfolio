@@ -106,7 +106,7 @@ pipeline {
         stage('Trivy Docker Image Scan') {
             steps {
                 script {
-                    bat "trivy image --format table -o trivy-docker-image-report.html krishchadha/angular-final:${env.BUILD_ID}"
+                    cmd "trivy image --format table -o trivy-docker-image-report.html krishchadha/angular-final:${env.BUILD_ID}"
                     archiveArtifacts artifacts: 'trivy-docker-image-report.html'
                 }
             }
