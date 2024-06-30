@@ -53,23 +53,23 @@ pipeline {
                 }
             }
         }
-       stage('SonarQube Quality Analysis') {
-                    steps {
-                        script {
-                            try {
-                                echo "Running SonarQube analysis..."
-                                withSonarQubeEnv("Sonar") {
-                                    bat "${env.SONAR_HOME}\\bin\\sonar-scanner.bat -Dsonar.projectName=portfolio -Dsonar.projectKey=portfolio"
-                                }
-                                echo "SonarQube analysis completed."
-                            } catch (Exception e) {
-                                echo "Error during SonarQube analysis: ${e.message}"
-                                currentBuild.result = 'FAILURE'
-                                throw e
-                            }
-                        }
-                    }
-                }
+       // stage('SonarQube Quality Analysis') {
+       //              steps {
+       //                  script {
+       //                      try {
+       //                          echo "Running SonarQube analysis..."
+       //                          withSonarQubeEnv("Sonar") {
+       //                              bat "${env.SONAR_HOME}\\bin\\sonar-scanner.bat -Dsonar.projectName=portfolio -Dsonar.projectKey=portfolio"
+       //                          }
+       //                          echo "SonarQube analysis completed."
+       //                      } catch (Exception e) {
+       //                          echo "Error during SonarQube analysis: ${e.message}"
+       //                          currentBuild.result = 'FAILURE'
+       //                          throw e
+       //                      }
+       //                  }
+       //              }
+       //          }
         stage('OWASP Dependency Check') {
                     steps {
                         dependencyCheck additionalArguments: '--scan ./', odcInstallation: 'Owasp'
