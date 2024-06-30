@@ -22,37 +22,37 @@ pipeline {
             }
         }
 
-        stage('Install Dependencies') {
-            steps {
-                script {
-                    try {
-                        echo 'Starting npm install...'
-                        bat 'npm install'
-                        echo 'npm install completed.'
-                    } catch (Exception e) {
-                        echo "Error during npm install: ${e.message}"
-                        currentBuild.result = 'FAILURE'
-                        throw e
-                    }
-                }
-            }
-        }
+        // stage('Install Dependencies') {
+        //     steps {
+        //         script {
+        //             try {
+        //                 echo 'Starting npm install...'
+        //                 bat 'npm install'
+        //                 echo 'npm install completed.'
+        //             } catch (Exception e) {
+        //                 echo "Error during npm install: ${e.message}"
+        //                 currentBuild.result = 'FAILURE'
+        //                 throw e
+        //             }
+        //         }
+        //     }
+        // }
 
-        stage('Build Application') {
-            steps {
-                script {
-                    try {
-                        echo 'Starting npm run build...'
-                        bat 'npm run build'
-                        echo 'npm run build completed.'
-                    } catch (Exception e) {
-                        echo "Error during npm build: ${e.message}"
-                        currentBuild.result = 'FAILURE'
-                        throw e
-                    }
-                }
-            }
-        }
+        // stage('Build Application') {
+        //     steps {
+        //         script {
+        //             try {
+        //                 echo 'Starting npm run build...'
+        //                 bat 'npm run build'
+        //                 echo 'npm run build completed.'
+        //             } catch (Exception e) {
+        //                 echo "Error during npm build: ${e.message}"
+        //                 currentBuild.result = 'FAILURE'
+        //                 throw e
+        //             }
+        //         }
+        //     }
+        // }
        stage('SonarQube Quality Analysis') {
     steps {
         script {
@@ -81,13 +81,13 @@ pipeline {
         //         }
 
 
-        // stage('Sonar Quality Gate Scan') {
-        //     steps {
-        //         timeout(time: 2, unit: "MINUTES") {
-        //             waitForQualityGate abortPipeline: false
-        //         }
-        //     }
-        // }
+        stage('Sonar Quality Gate Scan') {
+            steps {
+                timeout(time: 2, unit: "MINUTES") {
+                    waitForQualityGate abortPipeline: false
+                }
+            }
+        }
 
         stage('Dockerize') {
             steps {
