@@ -9,6 +9,7 @@ pipeline {
         DOCKER_HUB_CREDENTIAL_ID = 'docker'
         AWS_REGION = 'ap-south-1'
         SONAR_HOME = tool 'Sonar'
+       SONARQUBE_URL = 'http://localhost:9000'
     }
 
     tools {
@@ -53,25 +54,23 @@ pipeline {
         //         }
         //     }
         // }
-       stage('SonarQube Quality Analysis') {
-    steps {
-        script {
-            try {
-                echo "Running SonarQube analysis..."
-                docker.image('e581108bc249').inside {
-                    withSonarQubeEnv("Sonar") { 
-                        sh 'sonar-scanner -Dsonar.projectName=portfolio -Dsonar.projectKey=portfolio'
+        stage('SonarQube Quality Analysis') {
+                    steps {
+                        script {
+                            try {
+                                echo "Running SonarQube analysis..."
+                                withSonarQubeEnv("SonarQube") {
+                                    bat "${SONAR_HOME}\\bin\\sonar-scanner.bat -Dsonar.projectName=wanderlust -Dsonar.projectKey=wanderlust -Dsonar.host.url=${env.SONARQUBE_URL} -Dsonar.login=Sonar"
+                                }
+                                echo "SonarQube analysis completed."
+                            } catch (Exception e) {
+                                echo "Error during SonarQube analysis: ${e.message}"
+                                currentBuild.result = 'FAILURE'
+                                throw e
+                            }
+                        }
                     }
                 }
-                echo "SonarQube analysis completed."
-            } catch (Exception e) {
-                echo "Error during SonarQube analysis: ${e.message}"
-                currentBuild.result = 'FAILURE'
-                throw e
-            }
-        }
-    }
-}
 
         // stage('OWASP Dependency Check') {
         //             steps {
