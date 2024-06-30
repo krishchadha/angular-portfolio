@@ -54,6 +54,13 @@ pipeline {
                 }
             }
         }
+      stage('OWASP Dependency Check') {
+                    steps {
+                        dependencyCheck additionalArguments: '--format HTML', odcInstallation: 'Owasp'
+                        dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+                    }
+                }
+
        stage('SonarQube Quality Analysis') {
             steps {
                 script {
@@ -75,13 +82,7 @@ pipeline {
         }
 
 
-        stage('OWASP Dependency Check') {
-                    steps {
-                        dependencyCheck additionalArguments: '--format HTML', odcInstallation: 'Owasp'
-                        dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
-                    }
-                }
-
+        
 
         stage('Sonar Quality Gate Scan') {
             steps {
