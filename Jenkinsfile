@@ -84,13 +84,13 @@ pipeline {
 
         
 
-        stage('Sonar Quality Gate Scan') {
-            steps {
-                timeout(time: 10, unit: "MINUTES") {
-                    waitForQualityGate abortPipeline: false
-                }
-            }
-        }
+        // stage('Sonar Quality Gate Scan') {
+        //     steps {
+        //         timeout(time: 10, unit: "MINUTES") {
+        //             waitForQualityGate abortPipeline: false
+        //         }
+        //     }
+        // }
 
         stage('Dockerize') {
             steps {
