@@ -62,53 +62,53 @@ pipeline {
                     }
                 }
 
-       // stage('SonarQube Quality Analysis') {
-       //      steps {
-       //          script {
-       //              try {
-       //                  echo "Running SonarQube analysis..."
-       //                  withSonarQubeEnv("Sonar") {
-       //                      withCredentials([string(credentialsId: 'sonar', variable: 'SONAR_TOKEN')]) {
-       //                          bat "${SONAR_HOME}\\bin\\sonar-scanner.bat -Dsonar.projectName=portfolio -Dsonar.projectKey=portfolio -Dsonar.host.url=${env.SONARQUBE_URL} -Dsonar.login=${SONAR_TOKEN}"
-       //                      }
-       //                  }
-       //                  echo "SonarQube analysis completed."
-       //              } catch (Exception e) {
-       //                  echo "Error during SonarQube analysis: ${e.message}"
-       //                  currentBuild.result = 'FAILURE'
-       //                  throw e
-       //              }
-       //          }
-       //      }
-       //  }
+       stage('SonarQube Quality Analysis') {
+            steps {
+                script {
+                    try {
+                        echo "Running SonarQube analysis..."
+                        withSonarQubeEnv("Sonar") {
+                            withCredentials([string(credentialsId: 'sonar', variable: 'SONAR_TOKEN')]) {
+                                bat "${SONAR_HOME}\\bin\\sonar-scanner.bat -Dsonar.projectName=portfolio -Dsonar.projectKey=portfolio -Dsonar.host.url=${env.SONARQUBE_URL} -Dsonar.login=${SONAR_TOKEN}"
+                            }
+                        }
+                        echo "SonarQube analysis completed."
+                    } catch (Exception e) {
+                        echo "Error during SonarQube analysis: ${e.message}"
+                        currentBuild.result = 'FAILURE'
+                        throw e
+                    }
+                }
+            }
+        }
 
 
         
 
-        // stage('Sonar Quality Gate Scan') {
-        //     steps {
-        //         timeout(time: 10, unit: "MINUTES") {
-        //             waitForQualityGate abortPipeline: false
-        //         }
-        //     }
-        // }
+        stage('Sonar Quality Gate Scan') {
+            steps {
+                timeout(time: 10, unit: "MINUTES") {
+                    waitForQualityGate abortPipeline: false
+                }
+            }
+        }
 
-        // stage('Dockerize') {
-        //     steps {
-        //         script {
-        //             try {
-        //                 def appImage = docker.build("krishchadha/angular-final:${env.BUILD_ID}")
-        //                 docker.withRegistry('https://index.docker.io/v1/', env.DOCKER_HUB_CREDENTIAL_ID) {
-        //                     appImage.push('latest')
-        //                 }
-        //             } catch (Exception e) {
-        //                 echo "Error during Docker build/push: ${e.message}"
-        //                 currentBuild.result = 'FAILURE'
-        //                 throw e
-        //             }
-        //         }
-        //     }
-        // }
+        stage('Dockerize') {
+            steps {
+                script {
+                    try {
+                        def appImage = docker.build("krishchadha/angular-final:${env.BUILD_ID}")
+                        docker.withRegistry('https://index.docker.io/v1/', env.DOCKER_HUB_CREDENTIAL_ID) {
+                            appImage.push('latest')
+                        }
+                    } catch (Exception e) {
+                        echo "Error during Docker build/push: ${e.message}"
+                        currentBuild.result = 'FAILURE'
+                        throw e
+                    }
+                }
+            }
+        }
 
         // stage('Trivy Docker Image Scan') {
         //     steps {
@@ -119,49 +119,49 @@ pipeline {
         //     }
         // }
 
-    //     stage('Deploy to S3') {
-    //         steps {
-    //             script {
-    //                 try {
-    //                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: env.AWS_CREDENTIALS_ID]]) {
-    //                         // Install AWS CLI
-    //                         bat 'curl "https://awscli.amazonaws.com/AWSCLIV2.msi" -o "AWSCLIV2.msi"'
-    //                         bat 'msiexec.exe /i AWSCLIV2.msi /qn'
-    //                         bat 'del AWSCLIV2.msi'  // Clean up the installer
+        stage('Deploy to S3') {
+            steps {
+                script {
+                    try {
+                        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: env.AWS_CREDENTIALS_ID]]) {
+                            // Install AWS CLI
+                            bat 'curl "https://awscli.amazonaws.com/AWSCLIV2.msi" -o "AWSCLIV2.msi"'
+                            bat 'msiexec.exe /i AWSCLIV2.msi /qn'
+                            bat 'del AWSCLIV2.msi'  // Clean up the installer
 
-    //                         // Print the directory structure for debugging
-    //                         bat 'dir dist\\angular-final\\browser'
+                            // Print the directory structure for debugging
+                            bat 'dir dist\\angular-final\\browser'
 
-    //                         // Copy build files to S3 bucket
-    //                         bat '''
-    //                             aws s3 cp dist/angular-final/browser/ s3://%S3_BUCKET%/ --recursive
-    //                         '''
+                            // Copy build files to S3 bucket
+                            bat '''
+                                aws s3 cp dist/angular-final/browser/ s3://%S3_BUCKET%/ --recursive
+                            '''
 
-    //                         // List the files in the S3 bucket to ensure they are uploaded
-    //                         bat '''
-    //                             aws s3 ls s3://%S3_BUCKET%/
-    //                         '''
-    //                     }
-    //                 } catch (Exception e) {
-    //                     echo "Error during S3 deployment: ${e.message}"
-    //                     currentBuild.result = 'FAILURE'
-    //                     throw e
-    //                 }
-    //             }
-    //         }
-    //     }
+                            // List the files in the S3 bucket to ensure they are uploaded
+                            bat '''
+                                aws s3 ls s3://%S3_BUCKET%/
+                            '''
+                        }
+                    } catch (Exception e) {
+                        echo "Error during S3 deployment: ${e.message}"
+                        currentBuild.result = 'FAILURE'
+                        throw e
+                    }
+                }
+            }
+        }
 
-    //     stage('Configure S3 Static Website Hosting') {
-    //         steps {
-    //             script {
-    //                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: env.AWS_CREDENTIALS_ID]]) {
-    //                     bat '''
-    //                         aws s3 website s3://%S3_BUCKET%/ --index-document index.html --error-document error.html
-    //                     '''
-    //                 }
-    //             }
-    //         }
-    //     }
+        stage('Configure S3 Static Website Hosting') {
+            steps {
+                script {
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: env.AWS_CREDENTIALS_ID]]) {
+                        bat '''
+                            aws s3 website s3://%S3_BUCKET%/ --index-document index.html --error-document error.html
+                        '''
+                    }
+                }
+            }
+        }
     }
 
     post {
