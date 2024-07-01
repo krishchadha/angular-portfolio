@@ -10,6 +10,7 @@ pipeline {
         AWS_REGION = 'ap-south-1'
         SONAR_HOME = tool 'Sonar'
         SONARQUBE_URL = 'http://localhost:9000'
+        NVD_API_KEY = 'owasp'
     }
 
     tools {
@@ -56,7 +57,7 @@ pipeline {
         }
       stage('OWASP Dependency Check') {
                     steps {
-                        dependencyCheck additionalArguments: '--format HTML', odcInstallation: 'Owasp'
+                        dependencyCheck additionalArguments: ' --scan target/ ', odcInstallation: 'Owasp'
                         dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
                     }
                 }
