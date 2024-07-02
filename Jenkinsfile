@@ -162,12 +162,11 @@ pipeline {
                 }
             }
         }
-     stage('Deploy Prometheus') {
+      stage('Deploy Prometheus') {
             steps {
                 script {
                     try {
                         echo 'Starting Prometheus setup...'
-                        // Use Docker to run Prometheus with the configuration file from the repository
                         bat 'docker run -d --name prometheus -p 9090:9090 -v %WORKSPACE%\\monitoring\\prometheus.yml:/etc/prometheus/prometheus.yml prom/prometheus'
                         echo 'Prometheus setup completed.'
                     } catch (Exception e) {
@@ -178,6 +177,55 @@ pipeline {
                 }
             }
         }
+
+        stage('Deploy Loki') {
+            steps {
+                script {
+                    try {
+                        echo 'Starting Loki setup...'
+                        bat 'docker run -d --name loki -p 3100:3100 -v %WORKSPACE%\\monitoring\\loki-config.yml:/etc/loki/local-config.yaml grafana/loki:2.2.1 -config.file=/etc/loki/local-config.yaml'
+                        echo 'Loki setup completed.'
+                    } catch (Exception e) {
+                        echo "Error during Loki setup: ${e.message}"
+                        currentBuild.result = 'FAILURE'
+                        throw e
+                    }
+                }
+            }
+        }
+
+        stage('Deploy Promtail') {
+            steps {
+                script {
+                    try {
+                        echo 'Starting Promtail setup...'
+                        bat 'docker run -d --name promtail -v %WORKSPACE%\\monitoring\\promtail-config.yml:/etc/promtail/config.yml grafana/promtail:2.2.1 -config.file=/etc/promtail/config.yml'
+                        echo 'Promtail setup completed.'
+                    } catch (Exception e) {
+                        echo "Error during Promtail setup: ${e.message}"
+                        currentBuild.result = 'FAILURE'
+                        throw e
+                    }
+                }
+            }
+        }
+
+        stage('Deploy Grafana') {
+            steps {
+                script {
+                    try {
+                        echo 'Starting Grafana setup...'
+                        bat 'docker run -d --name grafana -p 3000:3000 grafana/grafana'
+                        echo 'Grafana setup completed.'
+                    } catch (Exception e) {
+                        echo "Error during Grafana setup: ${e.message}"
+                        currentBuild.result = 'FAILURE'
+                        throw e
+                    }
+                }
+            }
+        }
+    }
 
     post {
         always {
