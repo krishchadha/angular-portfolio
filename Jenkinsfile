@@ -11,7 +11,7 @@ pipeline {
         SONAR_HOME = tool 'Sonar'
         SONARQUBE_URL = 'http://localhost:9000'
         NVD_API_KEY = 'owasp'
-        AWS_ACCESS_KEY_ID = credentials('aws_full_2')
+        AWS_ACCESS_KEY_ID = credentials('aws_id')
         AWS_SECRET_ACCESS_KEY = credentials('aws_secret_key') 
     }
 
