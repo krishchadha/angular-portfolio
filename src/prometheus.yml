@@ -1,0 +1,13 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+  - job_name: 'jenkins'
+    static_configs:
+      - targets: ['<Jenkins-URL>:<Jenkins-Port>']
+  - job_name: 'docker'
+    static_configs:
+      - targets: ['<Docker-Host>:9323']
