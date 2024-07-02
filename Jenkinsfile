@@ -60,7 +60,6 @@ pipeline {
   
 stage('Deploy Prometheus') {
             steps {
-                script {
                    script {
                   script {def sonarqubeserverContainer = dockerContainerExists('sonarqube-server')
             if (sonarqubeserverContainer) {
@@ -78,6 +77,8 @@ stage('Deploy Prometheus') {
                 }
             }
         }
+}
+
        stage('SonarQube Quality Analysis') {
             steps {
                 script {
@@ -185,8 +186,6 @@ stage('Deploy Prometheus') {
         }
       stage('Deploy Prometheus') {
             steps {
-                script {
-                   script {
                   script {def prometheusContainer = dockerContainerExists('prometheus')
             if (prometheusContainer) {
                 echo 'prometheus container is already running.'
@@ -206,7 +205,6 @@ stage('Deploy Prometheus') {
 
         stage('Deploy Loki') {
             steps {
-                script {
                   script {def LokiContainer = dockerContainerExists('Loki')
             if (LokiContainer) {
                 echo 'Loki container is already running.'
@@ -293,4 +291,4 @@ stage('Deploy Prometheus') {
         }
     }
 }
-      }
+      
