@@ -58,7 +58,26 @@ pipeline {
             }
         }
   
-
+stage('Deploy Prometheus') {
+            steps {
+                script {
+                   script {
+                  script {def sonarqubeserverContainer = dockerContainerExists('sonarqube-server')
+            if (sonarqubeserverContainer) {
+                echo 'sonarqube-server container is already running.'
+            } else {
+                    try {
+                        echo 'Starting sonarqube-server setup...'
+                        bat 'docker run -d --name sonarqube-server -p 9000:9000 sonarqube:lts-community'
+                        echo 'sonarqube-server setup completed.'
+                    } catch (Exception e) {
+                        echo "Error during sonarqube-server setup: ${e.message}"
+                        currentBuild.result = 'FAILURE'
+                        throw e
+                    }
+                }
+            }
+        }
        stage('SonarQube Quality Analysis') {
             steps {
                 script {
@@ -167,6 +186,11 @@ pipeline {
       stage('Deploy Prometheus') {
             steps {
                 script {
+                   script {
+                  script {def prometheusContainer = dockerContainerExists('prometheus')
+            if (prometheusContainer) {
+                echo 'prometheus container is already running.'
+            } else {
                     try {
                         echo 'Starting Prometheus setup...'
                         bat 'docker run -d --name prometheus -p 9090:9090 -v %WORKSPACE%\\monitoring\\prometheus.yml:/etc/prometheus/prometheus.yml prom/prometheus'
@@ -183,6 +207,10 @@ pipeline {
         stage('Deploy Loki') {
             steps {
                 script {
+                  script {def LokiContainer = dockerContainerExists('Loki')
+            if (LokiContainer) {
+                echo 'Loki container is already running.'
+            } else {
                     try {
                         echo 'Starting Loki setup...'
                         bat 'docker run -d --name loki -p 3100:3100 -v %WORKSPACE%\\monitoring\\loki-config.yml:/etc/loki/local-config.yaml grafana/loki:2.2.1 -config.file=/etc/loki/local-config.yaml'
@@ -198,7 +226,10 @@ pipeline {
 
         stage('Deploy Promtail') {
             steps {
-                script {
+                script {def promtailContainer = dockerContainerExists('promtail')
+            if (promtailContainer) {
+                echo 'Promtail container is already running.'
+            } else {
                     try { echo 'Starting Promtail setup...'
                 bat 'docker run -d --name promtail ' +
                     "-e AWS_ACCESS_KEY_ID=${env.AWS_ACCESS_KEY_ID} " +
@@ -218,10 +249,13 @@ pipeline {
 
         stage('Deploy Grafana') {
             steps {
-                script {
+                script {def grafanaContainer = dockerContainerExists('grafana')
+            if (grafanaContainer) {
+                echo 'grafana container is already running.'
+            } else {
                     try {
                         echo 'Starting Grafana setup...'
-                        bat 'docker run -d --name grafana-jenkins -p 3000:3000 grafana/grafana'
+                        bat 'docker run -d --name grafana -p 3000:3000 grafana/grafana'
                         echo 'Grafana setup completed.'
                     } catch (Exception e) {
                         echo "Error during Grafana setup: ${e.message}"
