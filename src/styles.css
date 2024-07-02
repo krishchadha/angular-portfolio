@@ -136,15 +136,10 @@ a:hover {
 
 .hamburger-icon span:first-child {
   transform: none;
+    opacity: 1;
+    transform: none;
 }
 
-.hamburger-icon span:first-child {
-  opacity: 1;
-}
-
-.hamburger-icon span:first-child {
-  transform: none;
-}
 
 /* SECTIONS */
 
