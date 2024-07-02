@@ -78,7 +78,7 @@ pipeline {
         }
 
 
-        
+        sleep(60)
 
         stage('Sonar Quality Gate Scan') {
             steps {
