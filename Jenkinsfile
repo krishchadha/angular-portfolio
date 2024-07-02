@@ -263,6 +263,7 @@ pipeline {
                 }
             }
         }
+        }
 
         stage('Deploy Grafana') {
             steps {
@@ -311,6 +312,4 @@ pipeline {
             }
         }
     }
-}
-
 }
