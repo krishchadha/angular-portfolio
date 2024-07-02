@@ -78,7 +78,15 @@ pipeline {
         }
 
 
-        sleep(60)
+        stage('Wait for SonarQube Processing') {
+            steps {
+                script {
+                    echo "Waiting for SonarQube to process the report..."
+                    sleep(time: 30, unit: "SECONDS")
+                }
+            }
+        }
+
 
         stage('Sonar Quality Gate Scan') {
             steps {
