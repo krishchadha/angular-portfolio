@@ -171,6 +171,22 @@ pipeline {
                 }
             }
         }
+      stage('Setup Monitoring Stack') {
+            steps {
+                script {
+                    try {
+                        bat '''
+                            docker-compose -f docker-compose-monitoring.yml up -d
+                        '''
+                        echo 'Monitoring stack setup completed.'
+                    } catch (Exception e) {
+                        echo "Error during monitoring stack setup: ${e.message}"
+                        currentBuild.result = 'FAILURE'
+                        throw e
+                    }
+                }
+            }
+        }
     }
 
     post {
