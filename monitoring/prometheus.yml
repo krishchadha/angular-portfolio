@@ -4,4 +4,4 @@ global:
 scrape_configs:
   - job_name: 'jenkins'
     static_configs:
-      - targets: ['localhost:8080']  # Replace with your Jenkins instance address
+      - targets: ['http://192.168.0.103:8080'] #jenkins
