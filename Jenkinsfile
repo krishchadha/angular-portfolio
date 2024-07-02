@@ -221,7 +221,7 @@ pipeline {
                 script {
                     try {
                         echo 'Starting Grafana setup...'
-                        bat 'docker run -d --name grafana -p 3000:3000 grafana/grafana'
+                        bat 'docker run -d --name grafana-jenkins -p 3000:3000 grafana/grafana'
                         echo 'Grafana setup completed.'
                     } catch (Exception e) {
                         echo "Error during Grafana setup: ${e.message}"
