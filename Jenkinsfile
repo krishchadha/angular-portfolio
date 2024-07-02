@@ -58,7 +58,7 @@ pipeline {
             }
         }
   
-stage('Deploy Prometheus') {
+stage('Deploy Sonarqube') {
             steps {
                    script {
                   script {def sonarqubeserverContainer = dockerContainerExists('sonarqube-server')
