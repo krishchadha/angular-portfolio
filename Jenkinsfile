@@ -73,7 +73,7 @@ stage('Deploy Prometheus') {
                     } catch (Exception e) {
                         echo "Error during sonarqube-server setup: ${e.message}"
                         currentBuild.result = 'FAILURE'
-                        throw e
+                        throw e}
                     }
                 }
             }
@@ -198,7 +198,7 @@ stage('Deploy Prometheus') {
                     } catch (Exception e) {
                         echo "Error during Prometheus setup: ${e.message}"
                         currentBuild.result = 'FAILURE'
-                        throw e
+                        throw e}
                     }
                 }
             }
@@ -218,7 +218,7 @@ stage('Deploy Prometheus') {
                     } catch (Exception e) {
                         echo "Error during Loki setup: ${e.message}"
                         currentBuild.result = 'FAILURE'
-                        throw e
+                        throw e}
                     }
                 }
             }
@@ -241,7 +241,7 @@ stage('Deploy Prometheus') {
             } catch (Exception e) {
                 echo "Error during Promtail setup: ${e.message}"
                 currentBuild.result = 'FAILURE'
-                throw e
+                throw e}
                     }
                 }
             }
@@ -260,7 +260,7 @@ stage('Deploy Prometheus') {
                     } catch (Exception e) {
                         echo "Error during Grafana setup: ${e.message}"
                         currentBuild.result = 'FAILURE'
-                        throw e
+                        throw e}
                     }
                 }
             }
