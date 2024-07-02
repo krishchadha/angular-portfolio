@@ -1,0 +1,36 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  - job_name: system
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: varlogs
+          __path__: /var/log/*log
+
+  - job_name: s3
+    s3_sd_configs:
+      - region: your-aws-region
+        bucket: your-s3-bucket
+        role_arn: arn:aws:iam::YOUR_AWS_ACCOUNT_ID:role/YOUR_S3_ACCESS_ROLE
+        access_key: YOUR_ACCESS_KEY
+        secret_key: YOUR_SECRET_KEY
+        prefix: your-s3-prefix
+    pipeline_stages:
+      - json:
+          expressions:
+            level: level
+            msg: message
+            time: timestamp
+      - labels:
+          level:
+          job: s3logs
