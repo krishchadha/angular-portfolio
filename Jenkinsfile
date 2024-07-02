@@ -55,9 +55,9 @@ pipeline {
         }
 
         stage('Deploy Sonarqube') {
+           def sonarqubeserverContainer = dockerContainerExists('sonarqube-server')
             steps {
                 script {
-                    def sonarqubeserverContainer = dockerContainerExists('sonarqube-server')
                     if (sonarqubeserverContainer) {
                         echo 'sonarqube-server container is already running.'
                     } else {
