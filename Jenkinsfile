@@ -60,7 +60,6 @@ pipeline {
   
 stage('Deploy Sonarqube') {
             steps {
-                   script {
                   script {def sonarqubeserverContainer = dockerContainerExists('sonarqube-server')
             if (sonarqubeserverContainer) {
                 echo 'sonarqube-server container is already running.'
@@ -76,8 +75,7 @@ stage('Deploy Sonarqube') {
                     }
                 }
             }
-        }
-}
+        
 
        stage('SonarQube Quality Analysis') {
             steps {
