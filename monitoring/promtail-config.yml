@@ -21,10 +21,8 @@ scrape_configs:
     s3_sd_configs:
       - region: ap-south-1  
         bucket: krishchadha.online 
-        role_arn: arn:aws:iam::905418216184:role/S3AccessRole  # Replace with your IAM role ARN
-        access_key: YOUR_ACCESS_KEY  # Replace with your AWS access key
-        secret_key: YOUR_SECRET_KEY  # Replace with your AWS secret key
-        prefix: logs/  # Replace with your S3 prefix
+        role_arn: arn:aws:iam::905418216184:role/promtail_aws_s3_access
+        prefix: logs/
     pipeline_stages:
       - json:
           expressions:
