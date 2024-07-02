@@ -11,6 +11,8 @@ pipeline {
         SONAR_HOME = tool 'Sonar'
         SONARQUBE_URL = 'http://localhost:9000'
         NVD_API_KEY = 'owasp'
+        AWS_ACCESS_KEY_ID = credentials('aws_full_2')
+        AWS_SECRET_ACCESS_KEY = credentials('aws_secret_key') 
     }
 
     tools {
@@ -197,14 +199,18 @@ pipeline {
         stage('Deploy Promtail') {
             steps {
                 script {
-                    try {
-                        echo 'Starting Promtail setup...'
-                        bat 'docker run -d --name promtail -v %WORKSPACE%\\monitoring\\promtail-config.yml:/etc/promtail/config.yml grafana/promtail:2.2.1 -config.file=/etc/promtail/config.yml'
-                        echo 'Promtail setup completed.'
-                    } catch (Exception e) {
-                        echo "Error during Promtail setup: ${e.message}"
-                        currentBuild.result = 'FAILURE'
-                        throw e
+                    try { echo 'Starting Promtail setup...'
+                bat 'docker run -d --name promtail ' +
+                    "-e AWS_ACCESS_KEY_ID=${env.AWS_ACCESS_KEY_ID} " +
+                    "-e AWS_SECRET_ACCESS_KEY=${env.AWS_SECRET_ACCESS_KEY} " +
+                    "-e AWS_DEFAULT_REGION=${env.AWS_REGION} " +
+                    "-v %WORKSPACE%\\monitoring\\promtail-config.yml:/etc/promtail/config.yml " +
+                    'grafana/promtail:2.2.1 -config.file=/etc/promtail/config.yml'
+                echo 'Promtail setup completed.'
+            } catch (Exception e) {
+                echo "Error during Promtail setup: ${e.message}"
+                currentBuild.result = 'FAILURE'
+                throw e
                     }
                 }
             }
