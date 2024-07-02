@@ -119,15 +119,6 @@ pipeline {
             }
         }
 
-        // stage('Trivy Docker Image Scan') {
-        //     steps {
-        //         script {
-        //             bat "trivy image --format table -o trivy-docker-image-report.html krishchadha/angular-final:${env.BUILD_ID}"
-        //             archiveArtifacts artifacts: 'trivy-docker-image-report.html'
-        //         }
-        //     }
-        // }
-
         stage('Deploy to S3') {
             steps {
                 script {
@@ -171,23 +162,22 @@ pipeline {
                 }
             }
         }
-      stage('Setup Monitoring Stack') {
+     stage('Deploy Prometheus') {
             steps {
                 script {
                     try {
-                        bat '''
-                            docker-compose -f docker-compose-monitoring.yml up -d
-                        '''
-                        echo 'Monitoring stack setup completed.'
+                        echo 'Starting Prometheus setup...'
+                        // Use Docker to run Prometheus with the configuration file from the repository
+                        bat 'docker run -d --name prometheus -p 9090:9090 -v %WORKSPACE%\\monitoring\\prometheus.yml:/etc/prometheus/prometheus.yml prom/prometheus'
+                        echo 'Prometheus setup completed.'
                     } catch (Exception e) {
-                        echo "Error during monitoring stack setup: ${e.message}"
+                        echo "Error during Prometheus setup: ${e.message}"
                         currentBuild.result = 'FAILURE'
                         throw e
                     }
                 }
             }
         }
-    }
 
     post {
         always {
