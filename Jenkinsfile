@@ -15,10 +15,6 @@ pipeline {
         AWS_SECRET_ACCESS_KEY = credentials('aws_secret_key') 
     }
 
-    tools {
-        nodejs "NodeJS_LTS"
-    }
-
     stages {
         stage('Clone Code from GitHub') {
             steps {
@@ -57,27 +53,29 @@ pipeline {
                 }
             }
         }
-  
-stage('Deploy Sonarqube') {
+
+        stage('Deploy Sonarqube') {
             steps {
-                  script {def sonarqubeserverContainer = dockerContainerExists('sonarqube-server')
-            if (sonarqubeserverContainer) {
-                echo 'sonarqube-server container is already running.'
-            } else {
-                    try {
-                        echo 'Starting sonarqube-server setup...'
-                        bat 'docker run -d --name sonarqube-server -p 9000:9000 sonarqube:lts-community'
-                        echo 'sonarqube-server setup completed.'
-                    } catch (Exception e) {
-                        echo "Error during sonarqube-server setup: ${e.message}"
-                        currentBuild.result = 'FAILURE'
-                        throw e}
+                script {
+                    def sonarqubeserverContainer = dockerContainerExists('sonarqube-server')
+                    if (sonarqubeserverContainer) {
+                        echo 'sonarqube-server container is already running.'
+                    } else {
+                        try {
+                            echo 'Starting sonarqube-server setup...'
+                            bat 'docker run -d --name sonarqube-server -p 9000:9000 sonarqube:lts-community'
+                            echo 'sonarqube-server setup completed.'
+                        } catch (Exception e) {
+                            echo "Error during sonarqube-server setup: ${e.message}"
+                            currentBuild.result = 'FAILURE'
+                            throw e
+                        }
                     }
                 }
             }
-}
+        }
 
-       stage('SonarQube Quality Analysis') {
+        stage('SonarQube Quality Analysis') {
             steps {
                 script {
                     try {
@@ -97,7 +95,6 @@ stage('Deploy Sonarqube') {
             }
         }
 
-
         stage('Wait for SonarQube Processing') {
             steps {
                 script {
@@ -107,7 +104,6 @@ stage('Deploy Sonarqube') {
             }
         }
 
-
         stage('Sonar Quality Gate Scan') {
             steps {
                 timeout(time: 10, unit: "MINUTES") {
@@ -115,21 +111,35 @@ stage('Deploy Sonarqube') {
                 }
             }
         }
-          stage('OWASP Dependency Check') {
-                    steps {
+
+        stage('OWASP Dependency Check') {
+            steps {
+                script {
+                    try {
+                        echo 'Running OWASP Dependency Check...'
+                        // Adjust dependency check steps as per your configuration
                         dependencyCheck additionalArguments: ' --scan ./ --format HTML', odcInstallation: 'Owasp'
                         dependencyCheckPublisher pattern: '**/dependency-check-report.html'
+                        echo 'OWASP Dependency Check completed.'
+                    } catch (Exception e) {
+                        echo "Error during OWASP Dependency Check: ${e.message}"
+                        currentBuild.result = 'FAILURE'
+                        throw e
                     }
                 }
+            }
+        }
 
         stage('Dockerize') {
             steps {
                 script {
                     try {
+                        echo 'Building Docker image...'
                         def appImage = docker.build("krishchadha/angular-final:${env.BUILD_ID}")
                         docker.withRegistry('https://index.docker.io/v1/', env.DOCKER_HUB_CREDENTIAL_ID) {
                             appImage.push('latest')
                         }
+                        echo 'Docker image built and pushed.'
                     } catch (Exception e) {
                         echo "Error during Docker build/push: ${e.message}"
                         currentBuild.result = 'FAILURE'
@@ -144,7 +154,8 @@ stage('Deploy Sonarqube') {
                 script {
                     try {
                         withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: env.AWS_CREDENTIALS_ID]]) {
-                            // Install AWS CLI
+                            echo 'Deploying to S3...'
+                            // Install AWS CLI (if necessary)
                             bat 'curl "https://awscli.amazonaws.com/AWSCLIV2.msi" -o "AWSCLIV2.msi"'
                             bat 'msiexec.exe /i AWSCLIV2.msi /qn'
                             bat 'del AWSCLIV2.msi'  // Clean up the installer
@@ -161,6 +172,7 @@ stage('Deploy Sonarqube') {
                             bat '''
                                 aws s3 ls s3://%S3_BUCKET%/
                             '''
+                            echo 'S3 deployment completed.'
                         }
                     } catch (Exception e) {
                         echo "Error during S3 deployment: ${e.message}"
@@ -175,27 +187,32 @@ stage('Deploy Sonarqube') {
             steps {
                 script {
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: env.AWS_CREDENTIALS_ID]]) {
+                        echo 'Configuring S3 Static Website Hosting...'
                         bat '''
                             aws s3 website s3://%S3_BUCKET%/ --index-document index.html --error-document error.html
                         '''
+                        echo 'S3 Static Website Hosting configured.'
                     }
                 }
             }
         }
-      stage('Deploy Prometheus') {
+
+        stage('Deploy Prometheus') {
             steps {
-                  script {def prometheusContainer = dockerContainerExists('prometheus')
-            if (prometheusContainer) {
-                echo 'prometheus container is already running.'
-            } else {
-                    try {
-                        echo 'Starting Prometheus setup...'
-                        bat 'docker run -d --name prometheus -p 9090:9090 -v %WORKSPACE%\\monitoring\\prometheus.yml:/etc/prometheus/prometheus.yml prom/prometheus'
-                        echo 'Prometheus setup completed.'
-                    } catch (Exception e) {
-                        echo "Error during Prometheus setup: ${e.message}"
-                        currentBuild.result = 'FAILURE'
-                        throw e}
+                script {
+                    def prometheusContainer = dockerContainerExists('prometheus')
+                    if (prometheusContainer) {
+                        echo 'Prometheus container is already running.'
+                    } else {
+                        try {
+                            echo 'Starting Prometheus setup...'
+                            bat 'docker run -d --name prometheus -p 9090:9090 -v %WORKSPACE%\\monitoring\\prometheus.yml:/etc/prometheus/prometheus.yml prom/prometheus'
+                            echo 'Prometheus setup completed.'
+                        } catch (Exception e) {
+                            echo "Error during Prometheus setup: ${e.message}"
+                            currentBuild.result = 'FAILURE'
+                            throw e
+                        }
                     }
                 }
             }
@@ -203,18 +220,20 @@ stage('Deploy Sonarqube') {
 
         stage('Deploy Loki') {
             steps {
-                  script {def LokiContainer = dockerContainerExists('Loki')
-            if (LokiContainer) {
-                echo 'Loki container is already running.'
-            } else {
-                    try {
-                        echo 'Starting Loki setup...'
-                        bat 'docker run -d --name loki -p 3100:3100 -v %WORKSPACE%\\monitoring\\loki-config.yml:/etc/loki/local-config.yaml grafana/loki:2.2.1 -config.file=/etc/loki/local-config.yaml'
-                        echo 'Loki setup completed.'
-                    } catch (Exception e) {
-                        echo "Error during Loki setup: ${e.message}"
-                        currentBuild.result = 'FAILURE'
-                        throw e}
+                script {
+                    def lokiContainer = dockerContainerExists('loki')
+                    if (lokiContainer) {
+                        echo 'Loki container is already running.'
+                    } else {
+                        try {
+                            echo 'Starting Loki setup...'
+                            bat 'docker run -d --name loki -p 3100:3100 -v %WORKSPACE%\\monitoring\\loki-config.yml:/etc/loki/local-config.yaml grafana/loki:2.2.1 -config.file=/etc/loki/local-config.yaml'
+                            echo 'Loki setup completed.'
+                        } catch (Exception e) {
+                            echo "Error during Loki setup: ${e.message}"
+                            currentBuild.result = 'FAILURE'
+                            throw e
+                        }
                     }
                 }
             }
@@ -222,22 +241,24 @@ stage('Deploy Sonarqube') {
 
         stage('Deploy Promtail') {
             steps {
-                script {def promtailContainer = dockerContainerExists('promtail')
-            if (promtailContainer) {
-                echo 'Promtail container is already running.'
-            } else {
-                    try { echo 'Starting Promtail setup...'
-                bat 'docker run -d --name promtail ' +
-                    "-e AWS_ACCESS_KEY_ID=${env.AWS_ACCESS_KEY_ID} " +
-                    "-e AWS_SECRET_ACCESS_KEY=${env.AWS_SECRET_ACCESS_KEY} " +
-                    "-e AWS_DEFAULT_REGION=${env.AWS_REGION} " +
-                    "-v %WORKSPACE%\\monitoring\\promtail-config.yml:/etc/promtail/config.yml " +
-                    'grafana/promtail:2.2.1 -config.file=/etc/promtail/config.yml'
-                echo 'Promtail setup completed.'
-            } catch (Exception e) {
-                echo "Error during Promtail setup: ${e.message}"
-                currentBuild.result = 'FAILURE'
-                throw e}
+                script {
+                 def promtailContainer = dockerContainerExists('promtail')
+                if (promtailContainer) {
+                    echo 'Promtail container is already running.'
+                } else {
+                    try {
+                        echo 'Starting Promtail setup...'
+                        bat 'docker run -d --name promtail ' +
+                            "-e AWS_ACCESS_KEY_ID=${env.AWS_ACCESS_KEY_ID} " +
+                            "-e AWS_SECRET_ACCESS_KEY=${env.AWS_SECRET_ACCESS_KEY} " +
+                            "-e AWS_DEFAULT_REGION=${env.AWS_REGION} " +
+                            "-v %WORKSPACE%\\monitoring\\promtail-config.yml:/etc/promtail/config.yml " +
+                            'grafana/promtail:2.2.1 -config.file=/etc/promtail/config.yml'
+                        echo 'Promtail setup completed.'
+                    } catch (Exception e) {
+                        echo "Error during Promtail setup: ${e.message}"
+                        currentBuild.result = 'FAILURE'
+                        throw e
                     }
                 }
             }
@@ -245,18 +266,20 @@ stage('Deploy Sonarqube') {
 
         stage('Deploy Grafana') {
             steps {
-                script {def grafanaContainer = dockerContainerExists('grafana')
-            if (grafanaContainer) {
-                echo 'grafana container is already running.'
-            } else {
-                    try {
-                        echo 'Starting Grafana setup...'
-                        bat 'docker run -d --name grafana -p 3000:3000 grafana/grafana'
-                        echo 'Grafana setup completed.'
-                    } catch (Exception e) {
-                        echo "Error during Grafana setup: ${e.message}"
-                        currentBuild.result = 'FAILURE'
-                        throw e}
+                script {
+                    def grafanaContainer = dockerContainerExists('grafana')
+                    if (grafanaContainer) {
+                        echo 'Grafana container is already running.'
+                    } else {
+                        try {
+                            echo 'Starting Grafana setup...'
+                            bat 'docker run -d --name grafana -p 3000:3000 grafana/grafana'
+                            echo 'Grafana setup completed.'
+                        } catch (Exception e) {
+                            echo "Error during Grafana setup: ${e.message}"
+                            currentBuild.result = 'FAILURE'
+                            throw e
+                        }
                     }
                 }
             }
@@ -289,4 +312,4 @@ stage('Deploy Sonarqube') {
         }
     }
 }
-      
+
