@@ -64,7 +64,7 @@ pipeline {
                         echo "Running SonarQube analysis..."
                         withSonarQubeEnv("Sonar") {
                             withCredentials([string(credentialsId: 'sonar', variable: 'SONAR_TOKEN')]) {
-                                bat "${SONAR_HOME}\\bin\\sonar-scanner.bat -Dsonar.projectName=portfolio -Dsonar.projectKey=portfolio -Dsonar.host.url=${env.SONARQUBE_URL} -Dsonar.login=${SONAR_TOKEN}"
+                                bat "${SONAR_HOME}\\bin\\sonar-scanner.bat -Dsonar.projectName=portfolio -Dsonar.projectKey=portfolio -Dsonar.exclusions=**/dependency-check-report.html -Dsonar.host.url=${env.SONARQUBE_URL} -Dsonar.login=${SONAR_TOKEN}"
                             }
                         }
                         echo "SonarQube analysis completed."
