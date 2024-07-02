@@ -75,7 +75,7 @@ stage('Deploy Sonarqube') {
                     }
                 }
             }
-        
+}
 
        stage('SonarQube Quality Analysis') {
             steps {
