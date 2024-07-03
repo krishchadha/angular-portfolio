@@ -57,7 +57,7 @@ pipeline {
         stage('Deploy SonarQube') {
             steps {
                 script {
-                    def sonarqubeContainer = sh(script: "docker ps -q -f name=sonarqube-server", returnStdout: true).trim()
+                    def sonarqubeContainer = bat(script: "docker ps -q -f name=sonarqube-server", returnStdout: true).trim()
                     if (sonarqubeContainer) {
                         echo 'sonarqube-server container is already running.'
                     } else {
@@ -195,7 +195,7 @@ pipeline {
         stage('Deploy Prometheus') {
             steps {
                 script {
-                    def prometheusContainer = sh(script: "docker ps -q -f name=prometheus", returnStdout: true).trim()
+                    def prometheusContainer = bat(script: "docker ps -q -f name=prometheus", returnStdout: true).trim()
                     if (prometheusContainer) {
                         echo 'Prometheus container is already running.'
                     } else {
@@ -216,7 +216,7 @@ pipeline {
         stage('Deploy Loki') {
             steps {
                 script {
-                    def lokiContainer = sh(script: "docker ps -q -f name=loki", returnStdout: true).trim()
+                    def lokiContainer = bat(script: "docker ps -q -f name=loki", returnStdout: true).trim()
                     if (lokiContainer) {
                         echo 'Loki container is already running.'
                     } else {
@@ -237,7 +237,7 @@ pipeline {
         stage('Deploy Promtail') {
             steps {
                 script {
-                    def promtailContainer = sh(script: "docker ps -q -f name=promtail", returnStdout: true).trim()
+                    def promtailContainer = bat(script: "docker ps -q -f name=promtail", returnStdout: true).trim()
                     if (promtailContainer) {
                         echo 'Promtail container is already running.'
                     } else {
@@ -263,7 +263,7 @@ pipeline {
         stage('Deploy Grafana') {
             steps {
                 script {
-                    def grafanaContainer = sh(script: "docker ps -q -f name=grafana", returnStdout: true).trim()
+                    def grafanaContainer = bat(script: "docker ps -q -f name=grafana", returnStdout: true).trim()
                     if (grafanaContainer) {
                         echo 'Grafana container is already running.'
                     } else {
