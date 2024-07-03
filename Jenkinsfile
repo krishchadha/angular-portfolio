@@ -54,11 +54,11 @@ pipeline {
             }
         }
 
-        stage('Deploy Sonarqube') {
+        stage('Deploy SonarQube') {
             steps {
-              def sonarqubeserverContainer = dockerContainerExists('sonarqube-server')
                 script {
-                    if (sonarqubeserverContainer) {
+                    def sonarqubeContainer = sh(script: "docker ps -q -f name=sonarqube-server", returnStdout: true).trim()
+                    if (sonarqubeContainer) {
                         echo 'sonarqube-server container is already running.'
                     } else {
                         try {
@@ -117,7 +117,6 @@ pipeline {
                 script {
                     try {
                         echo 'Running OWASP Dependency Check...'
-                        // Adjust dependency check steps as per your configuration
                         dependencyCheck additionalArguments: ' --scan ./ --format HTML', odcInstallation: 'Owasp'
                         dependencyCheckPublisher pattern: '**/dependency-check-report.html'
                         echo 'OWASP Dependency Check completed.'
@@ -155,20 +154,16 @@ pipeline {
                     try {
                         withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: env.AWS_CREDENTIALS_ID]]) {
                             echo 'Deploying to S3...'
-                            // Install AWS CLI (if necessary)
                             bat 'curl "https://awscli.amazonaws.com/AWSCLIV2.msi" -o "AWSCLIV2.msi"'
                             bat 'msiexec.exe /i AWSCLIV2.msi /qn'
-                            bat 'del AWSCLIV2.msi'  // Clean up the installer
+                            bat 'del AWSCLIV2.msi' 
 
-                            // Print the directory structure for debugging
                             bat 'dir dist\\angular-final\\browser'
 
-                            // Copy build files to S3 bucket
                             bat '''
                                 aws s3 cp dist/angular-final/browser/ s3://%S3_BUCKET%/ --recursive
                             '''
 
-                            // List the files in the S3 bucket to ensure they are uploaded
                             bat '''
                                 aws s3 ls s3://%S3_BUCKET%/
                             '''
@@ -199,9 +194,8 @@ pipeline {
 
         stage('Deploy Prometheus') {
             steps {
-              def prometheusContainer = dockerContainerExists('prometheus')
                 script {
-                    
+                    def prometheusContainer = sh(script: "docker ps -q -f name=prometheus", returnStdout: true).trim()
                     if (prometheusContainer) {
                         echo 'Prometheus container is already running.'
                     } else {
@@ -221,9 +215,8 @@ pipeline {
 
         stage('Deploy Loki') {
             steps {
-              def lokiContainer = dockerContainerExists('loki')
                 script {
-                    
+                    def lokiContainer = sh(script: "docker ps -q -f name=loki", returnStdout: true).trim()
                     if (lokiContainer) {
                         echo 'Loki container is already running.'
                     } else {
@@ -243,36 +236,34 @@ pipeline {
 
         stage('Deploy Promtail') {
             steps {
-                def promtailContainer = dockerContainerExists('promtail')
                 script {
-               
-                if (promtailContainer) {
-                    echo 'Promtail container is already running.'
-                } else {
-                    try {
-                        echo 'Starting Promtail setup...'
-                        bat 'docker run -d --name promtail ' +
-                            "-e AWS_ACCESS_KEY_ID=${env.AWS_ACCESS_KEY_ID} " +
-                            "-e AWS_SECRET_ACCESS_KEY=${env.AWS_SECRET_ACCESS_KEY} " +
-                            "-e AWS_DEFAULT_REGION=${env.AWS_REGION} " +
-                            "-v %WORKSPACE%\\monitoring\\promtail-config.yml:/etc/promtail/config.yml " +
-                            'grafana/promtail:2.2.1 -config.file=/etc/promtail/config.yml'
-                        echo 'Promtail setup completed.'
-                    } catch (Exception e) {
-                        echo "Error during Promtail setup: ${e.message}"
-                        currentBuild.result = 'FAILURE'
-                        throw e
+                    def promtailContainer = sh(script: "docker ps -q -f name=promtail", returnStdout: true).trim()
+                    if (promtailContainer) {
+                        echo 'Promtail container is already running.'
+                    } else {
+                        try {
+                            echo 'Starting Promtail setup...'
+                            bat 'docker run -d --name promtail ' +
+                                "-e AWS_ACCESS_KEY_ID=${env.AWS_ACCESS_KEY_ID} " +
+                                "-e AWS_SECRET_ACCESS_KEY=${env.AWS_SECRET_ACCESS_KEY} " +
+                                "-e AWS_DEFAULT_REGION=${env.AWS_REGION} " +
+                                "-v %WORKSPACE%\\monitoring\\promtail-config.yml:/etc/promtail/config.yml " +
+                                'grafana/promtail:2.2.1 -config.file=/etc/promtail/config.yml'
+                            echo 'Promtail setup completed.'
+                        } catch (Exception e) {
+                            echo "Error during Promtail setup: ${e.message}"
+                            currentBuild.result = 'FAILURE'
+                            throw e
+                        }
                     }
                 }
             }
         }
-        }
 
         stage('Deploy Grafana') {
             steps {
-               def grafanaContainer = dockerContainerExists('grafana')
                 script {
-                   
+                    def grafanaContainer = sh(script: "docker ps -q -f name=grafana", returnStdout: true).trim()
                     if (grafanaContainer) {
                         echo 'Grafana container is already running.'
                     } else {
