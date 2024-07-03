@@ -55,8 +55,8 @@ pipeline {
         }
 
         stage('Deploy Sonarqube') {
-           def sonarqubeserverContainer = dockerContainerExists('sonarqube-server')
             steps {
+              def sonarqubeserverContainer = dockerContainerExists('sonarqube-server')
                 script {
                     if (sonarqubeserverContainer) {
                         echo 'sonarqube-server container is already running.'
@@ -199,8 +199,9 @@ pipeline {
 
         stage('Deploy Prometheus') {
             steps {
+              def prometheusContainer = dockerContainerExists('prometheus')
                 script {
-                    def prometheusContainer = dockerContainerExists('prometheus')
+                    
                     if (prometheusContainer) {
                         echo 'Prometheus container is already running.'
                     } else {
@@ -220,8 +221,9 @@ pipeline {
 
         stage('Deploy Loki') {
             steps {
+              def lokiContainer = dockerContainerExists('loki')
                 script {
-                    def lokiContainer = dockerContainerExists('loki')
+                    
                     if (lokiContainer) {
                         echo 'Loki container is already running.'
                     } else {
@@ -241,8 +243,9 @@ pipeline {
 
         stage('Deploy Promtail') {
             steps {
+                def promtailContainer = dockerContainerExists('promtail')
                 script {
-                 def promtailContainer = dockerContainerExists('promtail')
+               
                 if (promtailContainer) {
                     echo 'Promtail container is already running.'
                 } else {
@@ -267,8 +270,9 @@ pipeline {
 
         stage('Deploy Grafana') {
             steps {
+               def grafanaContainer = dockerContainerExists('grafana')
                 script {
-                    def grafanaContainer = dockerContainerExists('grafana')
+                   
                     if (grafanaContainer) {
                         echo 'Grafana container is already running.'
                     } else {
