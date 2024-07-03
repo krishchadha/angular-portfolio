@@ -210,7 +210,7 @@ pipeline {
                         }
                     }
                 }
-        //     }
+            }
         // }
 
         stage('Deploy Loki') {
@@ -231,7 +231,7 @@ pipeline {
                         }
                     }
                 }
-        //     }
+              }
         // }
 
         stage('Deploy Promtail') {
@@ -257,7 +257,7 @@ pipeline {
                         }
                     }
                 }
-        //     }
+             }
         // }
 
     //     stage('Deploy Grafana') {
