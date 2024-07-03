@@ -57,7 +57,7 @@ pipeline {
         stage('Deploy SonarQube') {
             steps {
                 script {
-                    def sonarqubeContainer = bat(script: "docker ps -q -f name=sonarqube-server", returnStdout: true).trim()
+                    def sonarqubeContainer = bat(script: "docker ps -q -f name=sonarqube-server").trim()
                     if (sonarqubeContainer) {
                         echo 'sonarqube-server container is already running.'
                     } else {
