@@ -54,26 +54,26 @@ pipeline {
             }
         }
 
-        stage('Deploy SonarQube') {
-            steps {
-                script {
-                    def sonarqubeContainer = bat(script: "docker ps -q -f name=sonarqube-server").trim()
-                    if (sonarqubeContainer) {
-                        echo 'sonarqube-server container is already running.'
-                    } else {
-                        try {
-                            echo 'Starting sonarqube-server setup...'
-                            bat 'docker run -d --name sonarqube-server -p 9000:9000 sonarqube:lts-community'
-                            echo 'sonarqube-server setup completed.'
-                        } catch (Exception e) {
-                            echo "Error during sonarqube-server setup: ${e.message}"
-                            currentBuild.result = 'FAILURE'
-                            throw e
-                        }
-                    }
-                }
-            }
-        }
+        // stage('Deploy SonarQube') {
+        //     steps {
+        //         script {
+        //             def sonarqubeContainer = bat(script: "docker ps -q -f name=sonarqube-server").trim()
+        //             if (sonarqubeContainer) {
+        //                 echo 'sonarqube-server container is already running.'
+        //             } else {
+        //                 try {
+        //                     echo 'Starting sonarqube-server setup...'
+        //                     bat 'docker run -d --name sonarqube-server -p 9000:9000 sonarqube:lts-community'
+        //                     echo 'sonarqube-server setup completed.'
+        //                 } catch (Exception e) {
+        //                     echo "Error during sonarqube-server setup: ${e.message}"
+        //                     currentBuild.result = 'FAILURE'
+        //                     throw e
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
 
         stage('SonarQube Quality Analysis') {
             steps {
@@ -195,10 +195,10 @@ pipeline {
         stage('Deploy Prometheus') {
             steps {
                 script {
-                    def prometheusContainer = bat(script: "docker ps -q -f name=prometheus", returnStdout: true).trim()
-                    if (prometheusContainer) {
-                        echo 'Prometheus container is already running.'
-                    } else {
+                    // def prometheusContainer = bat(script: "docker ps -q -f name=prometheus", returnStdout: true).trim()
+                    // if (prometheusContainer) {
+                    //     echo 'Prometheus container is already running.'
+                    // } else {
                         try {
                             echo 'Starting Prometheus setup...'
                             bat 'docker run -d --name prometheus -p 9090:9090 -v %WORKSPACE%\\monitoring\\prometheus.yml:/etc/prometheus/prometheus.yml prom/prometheus'
@@ -216,10 +216,10 @@ pipeline {
         stage('Deploy Loki') {
             steps {
                 script {
-                    def lokiContainer = bat(script: "docker ps -q -f name=loki", returnStdout: true).trim()
-                    if (lokiContainer) {
-                        echo 'Loki container is already running.'
-                    } else {
+                    // def lokiContainer = bat(script: "docker ps -q -f name=loki", returnStdout: true).trim()
+                    // if (lokiContainer) {
+                    //     echo 'Loki container is already running.'
+                    // } else {
                         try {
                             echo 'Starting Loki setup...'
                             bat 'docker run -d --name loki -p 3100:3100 -v %WORKSPACE%\\monitoring\\loki-config.yml:/etc/loki/local-config.yaml grafana/loki:2.2.1 -config.file=/etc/loki/local-config.yaml'
@@ -237,10 +237,10 @@ pipeline {
         stage('Deploy Promtail') {
             steps {
                 script {
-                    def promtailContainer = bat(script: "docker ps -q -f name=promtail", returnStdout: true).trim()
-                    if (promtailContainer) {
-                        echo 'Promtail container is already running.'
-                    } else {
+                    // def promtailContainer = bat(script: "docker ps -q -f name=promtail", returnStdout: true).trim()
+                    // if (promtailContainer) {
+                    //     echo 'Promtail container is already running.'
+                    // } else {
                         try {
                             echo 'Starting Promtail setup...'
                             bat 'docker run -d --name promtail ' +
@@ -260,27 +260,27 @@ pipeline {
             }
         }
 
-        stage('Deploy Grafana') {
-            steps {
-                script {
-                    def grafanaContainer = bat(script: "docker ps -q -f name=grafana", returnStdout: true).trim()
-                    if (grafanaContainer) {
-                        echo 'Grafana container is already running.'
-                    } else {
-                        try {
-                            echo 'Starting Grafana setup...'
-                            bat 'docker run -d --name grafana -p 3000:3000 grafana/grafana'
-                            echo 'Grafana setup completed.'
-                        } catch (Exception e) {
-                            echo "Error during Grafana setup: ${e.message}"
-                            currentBuild.result = 'FAILURE'
-                            throw e
-                        }
-                    }
-                }
-            }
-        }
-    }
+    //     stage('Deploy Grafana') {
+    //         steps {
+    //             script {
+    //                 def grafanaContainer = bat(script: "docker ps -q -f name=grafana", returnStdout: true).trim()
+    //                 if (grafanaContainer) {
+    //                     echo 'Grafana container is already running.'
+    //                 } else {
+    //                     try {
+    //                         echo 'Starting Grafana setup...'
+    //                         bat 'docker run -d --name grafana -p 3000:3000 grafana/grafana'
+    //                         echo 'Grafana setup completed.'
+    //                     } catch (Exception e) {
+    //                         echo "Error during Grafana setup: ${e.message}"
+    //                         currentBuild.result = 'FAILURE'
+    //                         throw e
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
 
     post {
         always {
