@@ -192,72 +192,72 @@ pipeline {
             }
         }
 
-        stage('Deploy Prometheus') {
-            steps {
-                script {
-                    // def prometheusContainer = bat(script: "docker ps -q -f name=prometheus", returnStdout: true).trim()
-                    // if (prometheusContainer) {
-                    //     echo 'Prometheus container is already running.'
-                    // } else {
-                        try {
-                            echo 'Starting Prometheus setup...'
-                            bat 'docker run -d --name prometheus -p 9090:9090 -v %WORKSPACE%\\monitoring\\prometheus.yml:/etc/prometheus/prometheus.yml prom/prometheus'
-                            echo 'Prometheus setup completed.'
-                        } catch (Exception e) {
-                            echo "Error during Prometheus setup: ${e.message}"
-                            currentBuild.result = 'FAILURE'
-                            throw e
-                        }
-                    }
-                }
-            }
+        // stage('Deploy Prometheus') {
+        //     steps {
+        //         script {
+        //             // def prometheusContainer = bat(script: "docker ps -q -f name=prometheus", returnStdout: true).trim()
+        //             // if (prometheusContainer) {
+        //             //     echo 'Prometheus container is already running.'
+        //             // } else {
+        //                 try {
+        //                     echo 'Starting Prometheus setup...'
+        //                     bat 'docker run -d --name prometheus -p 9090:9090 -v %WORKSPACE%\\monitoring\\prometheus.yml:/etc/prometheus/prometheus.yml prom/prometheus'
+        //                     echo 'Prometheus setup completed.'
+        //                 } catch (Exception e) {
+        //                     echo "Error during Prometheus setup: ${e.message}"
+        //                     currentBuild.result = 'FAILURE'
+        //                     throw e
+        //                 }
+        //             }
+        //         }
+        //     }
         // }
 
-        stage('Deploy Loki') {
-            steps {
-                script {
-                    // def lokiContainer = bat(script: "docker ps -q -f name=loki", returnStdout: true).trim()
-                    // if (lokiContainer) {
-                    //     echo 'Loki container is already running.'
-                    // } else {
-                        try {
-                            echo 'Starting Loki setup...'
-                            bat 'docker run -d --name loki -p 3100:3100 -v %WORKSPACE%\\monitoring\\loki-config.yml:/etc/loki/local-config.yaml grafana/loki:2.2.1 -config.file=/etc/loki/local-config.yaml'
-                            echo 'Loki setup completed.'
-                        } catch (Exception e) {
-                            echo "Error during Loki setup: ${e.message}"
-                            currentBuild.result = 'FAILURE'
-                            throw e
-                        }
-                    }
-                }
-              }
+        // stage('Deploy Loki') {
+        //     steps {
+        //         script {
+        //             // def lokiContainer = bat(script: "docker ps -q -f name=loki", returnStdout: true).trim()
+        //             // if (lokiContainer) {
+        //             //     echo 'Loki container is already running.'
+        //             // } else {
+        //                 try {
+        //                     echo 'Starting Loki setup...'
+        //                     bat 'docker run -d --name loki -p 3100:3100 -v %WORKSPACE%\\monitoring\\loki-config.yml:/etc/loki/local-config.yaml grafana/loki:2.2.1 -config.file=/etc/loki/local-config.yaml'
+        //                     echo 'Loki setup completed.'
+        //                 } catch (Exception e) {
+        //                     echo "Error during Loki setup: ${e.message}"
+        //                     currentBuild.result = 'FAILURE'
+        //                     throw e
+        //                 }
+        //             }
+        //         }
+        //       }
         // }
 
-        stage('Deploy Promtail') {
-            steps {
-                script {
-                    // def promtailContainer = bat(script: "docker ps -q -f name=promtail", returnStdout: true).trim()
-                    // if (promtailContainer) {
-                    //     echo 'Promtail container is already running.'
-                    // } else {
-                        try {
-                            echo 'Starting Promtail setup...'
-                            bat 'docker run -d --name promtail ' +
-                                "-e AWS_ACCESS_KEY_ID=${env.AWS_ACCESS_KEY_ID} " +
-                                "-e AWS_SECRET_ACCESS_KEY=${env.AWS_SECRET_ACCESS_KEY} " +
-                                "-e AWS_DEFAULT_REGION=${env.AWS_REGION} " +
-                                "-v %WORKSPACE%\\monitoring\\promtail-config.yml:/etc/promtail/config.yml " +
-                                'grafana/promtail:2.2.1 -config.file=/etc/promtail/config.yml'
-                            echo 'Promtail setup completed.'
-                        } catch (Exception e) {
-                            echo "Error during Promtail setup: ${e.message}"
-                            currentBuild.result = 'FAILURE'
-                            throw e
-                        }
-                    }
-                }
-             }
+        // stage('Deploy Promtail') {
+        //     steps {
+        //         script {
+        //             // def promtailContainer = bat(script: "docker ps -q -f name=promtail", returnStdout: true).trim()
+        //             // if (promtailContainer) {
+        //             //     echo 'Promtail container is already running.'
+        //             // } else {
+        //                 try {
+        //                     echo 'Starting Promtail setup...'
+        //                     bat 'docker run -d --name promtail ' +
+        //                         "-e AWS_ACCESS_KEY_ID=${env.AWS_ACCESS_KEY_ID} " +
+        //                         "-e AWS_SECRET_ACCESS_KEY=${env.AWS_SECRET_ACCESS_KEY} " +
+        //                         "-e AWS_DEFAULT_REGION=${env.AWS_REGION} " +
+        //                         "-v %WORKSPACE%\\monitoring\\promtail-config.yml:/etc/promtail/config.yml " +
+        //                         'grafana/promtail:2.2.1 -config.file=/etc/promtail/config.yml'
+        //                     echo 'Promtail setup completed.'
+        //                 } catch (Exception e) {
+        //                     echo "Error during Promtail setup: ${e.message}"
+        //                     currentBuild.result = 'FAILURE'
+        //                     throw e
+        //                 }
+        //             }
+        //         }
+        //      }
         // }
 
     //     stage('Deploy Grafana') {
