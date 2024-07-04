@@ -19,8 +19,8 @@ scrape_configs:
 
   - job_name: s3
     s3_sd_configs:
-      - region: ap-south-1  
-        bucket: krishchadha.online 
+      - region: ap-south-1
+        bucket: krishchadha.online
         role_arn: arn:aws:iam::905418216184:user/PromtailUser
         prefix: logs/
     pipeline_stages:
@@ -30,5 +30,5 @@ scrape_configs:
             msg: message
             time: timestamp
       - labels:
-          level:
+          level: {}
           job: s3logs
