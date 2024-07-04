@@ -21,7 +21,7 @@ scrape_configs:
     s3_sd_configs:
       - region: ap-south-1  
         bucket: krishchadha.online 
-        role_arn: arn:aws:iam::905418216184:role/promtail_aws_s3_access
+        role_arn: arn:aws:iam::905418216184:user/PromtailUser
         prefix: logs/
     pipeline_stages:
       - json:
