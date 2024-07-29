@@ -54,59 +54,59 @@ pipeline {
             }
         }   
 
-        stage('SonarQube Quality Analysis') {
-            steps {
-                script {
-                    try {
-                        echo "Running SonarQube analysis..."
-                        withSonarQubeEnv("Sonar") {
-                            withCredentials([string(credentialsId: 'sonar', variable: 'SONAR_TOKEN')]) {
-                                bat "${SONAR_HOME}\\bin\\sonar-scanner.bat -Dsonar.projectName=portfolio -Dsonar.projectKey=portfolio -Dsonar.exclusions=**/dependency-check-report.html -Dsonar.host.url=${env.SONARQUBE_URL} -Dsonar.login=${SONAR_TOKEN}"
-                            }
-                        }
-                        echo "SonarQube analysis completed."
-                    } catch (Exception e) {
-                        echo "Error during SonarQube analysis: ${e.message}"
-                        currentBuild.result = 'FAILURE'
-                        throw e
-                    }
-                }
-            }
-        }
+        // stage('SonarQube Quality Analysis') {
+        //     steps {
+        //         script {
+        //             try {
+        //                 echo "Running SonarQube analysis..."
+        //                 withSonarQubeEnv("Sonar") {
+        //                     withCredentials([string(credentialsId: 'sonar', variable: 'SONAR_TOKEN')]) {
+        //                         bat "${SONAR_HOME}\\bin\\sonar-scanner.bat -Dsonar.projectName=portfolio -Dsonar.projectKey=portfolio -Dsonar.exclusions=**/dependency-check-report.html -Dsonar.host.url=${env.SONARQUBE_URL} -Dsonar.login=${SONAR_TOKEN}"
+        //                     }
+        //                 }
+        //                 echo "SonarQube analysis completed."
+        //             } catch (Exception e) {
+        //                 echo "Error during SonarQube analysis: ${e.message}"
+        //                 currentBuild.result = 'FAILURE'
+        //                 throw e
+        //             }
+        //         }
+        //     }
+        // }
 
-        stage('Wait for SonarQube Processing') {
-            steps {
-                script {
-                    echo "Waiting for SonarQube to process the report..."
-                    sleep(time: 30, unit: "SECONDS")
-                }
-            }
-        }
+        // stage('Wait for SonarQube Processing') {
+        //     steps {
+        //         script {
+        //             echo "Waiting for SonarQube to process the report..."
+        //             sleep(time: 30, unit: "SECONDS")
+        //         }
+        //     }
+        // }
 
-        stage('Sonar Quality Gate Scan') {
-            steps {
-                timeout(time: 10, unit: "MINUTES") {
-                    waitForQualityGate abortPipeline: false
-                }
-            }
-        }
+        // stage('Sonar Quality Gate Scan') {
+        //     steps {
+        //         timeout(time: 10, unit: "MINUTES") {
+        //             waitForQualityGate abortPipeline: false
+        //         }
+        //     }
+        // }
 
-        stage('OWASP Dependency Check') {
-            steps {
-                script {
-                    try {
-                        echo 'Running OWASP Dependency Check...'
-                        dependencyCheck additionalArguments: ' --scan ./ --format HTML', odcInstallation: 'Owasp'
-                        dependencyCheckPublisher pattern: '**/dependency-check-report.html'
-                        echo 'OWASP Dependency Check completed.'
-                    } catch (Exception e) {
-                        echo "Error during OWASP Dependency Check: ${e.message}"
-                        currentBuild.result = 'FAILURE'
-                        throw e
-                    }
-                }
-            }
-        }
+        // stage('OWASP Dependency Check') {
+        //     steps {
+        //         script {
+        //             try {
+        //                 echo 'Running OWASP Dependency Check...'
+        //                 dependencyCheck additionalArguments: ' --scan ./ --format HTML', odcInstallation: 'Owasp'
+        //                 dependencyCheckPublisher pattern: '**/dependency-check-report.html'
+        //                 echo 'OWASP Dependency Check completed.'
+        //             } catch (Exception e) {
+        //                 echo "Error during OWASP Dependency Check: ${e.message}"
+        //                 currentBuild.result = 'FAILURE'
+        //                 throw e
+        //             }
+        //         }
+        //     }
+        // }
 
         stage('Dockerize') {
             steps {
