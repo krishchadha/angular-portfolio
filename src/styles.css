@@ -153,6 +153,8 @@ section {
 
 .section-container {
   display: flex;
+   gap: 4rem;
+  height: 80%;
 }
 
 /* PROFILE SECTION */
@@ -252,9 +254,6 @@ section {
   border: rgb(255, 255, 255) 0.1rem solid;
 }
 
-.btn-container {
-  gap: 1rem;
-}
 
 /* ABOUT SECTION */
 
@@ -296,11 +295,6 @@ section {
   border: rgb(53, 53, 53) 0.1rem solid;
   border-color: rgb(163, 163, 163);
   text-align: center;
-}
-
-.section-container {
-  gap: 4rem;
-  height: 80%;
 }
 
 /* EXPERIENCE SECTION */
