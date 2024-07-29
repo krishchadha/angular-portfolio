@@ -108,24 +108,24 @@ pipeline {
         //     }
         // }
 
-        stage('Dockerize') {
-            steps {
-                script {
-                    try {
-                        echo 'Building Docker image...'
-                        def appImage = docker.build("krishchadha/angular-final:${env.BUILD_ID}")
-                        docker.withRegistry('https://index.docker.io/v1/', env.DOCKER_HUB_CREDENTIAL_ID) {
-                            appImage.push('latest')
-                        }
-                        echo 'Docker image built and pushed.'
-                    } catch (Exception e) {
-                        echo "Error during Docker build/push: ${e.message}"
-                        currentBuild.result = 'FAILURE'
-                        throw e
-                    }
-                }
-            }
-        }
+        // stage('Dockerize') {
+        //     steps {
+        //         script {
+        //             try {
+        //                 echo 'Building Docker image...'
+        //                 def appImage = docker.build("krishchadha/angular-final:${env.BUILD_ID}")
+        //                 docker.withRegistry('https://index.docker.io/v1/', env.DOCKER_HUB_CREDENTIAL_ID) {
+        //                     appImage.push('latest')
+        //                 }
+        //                 echo 'Docker image built and pushed.'
+        //             } catch (Exception e) {
+        //                 echo "Error during Docker build/push: ${e.message}"
+        //                 currentBuild.result = 'FAILURE'
+        //                 throw e
+        //             }
+        //         }
+        //     }
+        // }
 
         stage('Deploy to S3') {
             steps {
