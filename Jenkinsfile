@@ -91,22 +91,22 @@ pipeline {
             }
         }
 
-        // stage('OWASP Dependency Check') {
-        //     steps {
-        //         script {
-        //             try {
-        //                 echo 'Running OWASP Dependency Check...'
-        //                 dependencyCheck additionalArguments: ' --scan ./ --format HTML', odcInstallation: 'Owasp'
-        //                 dependencyCheckPublisher pattern: '**/dependency-check-report.html'
-        //                 echo 'OWASP Dependency Check completed.'
-        //             } catch (Exception e) {
-        //                 echo "Error during OWASP Dependency Check: ${e.message}"
-        //                 currentBuild.result = 'FAILURE'
-        //                 throw e
-        //             }
-        //         }
-        //     }
-        // }
+        stage('OWASP Dependency Check') {
+            steps {
+                script {
+                    try {
+                        echo 'Running OWASP Dependency Check...'
+                        dependencyCheck additionalArguments: ' --scan ./ --format HTML', odcInstallation: 'Owasp'
+                        dependencyCheckPublisher pattern: '**/dependency-check-report.html'
+                        echo 'OWASP Dependency Check completed.'
+                    } catch (Exception e) {
+                        echo "Error during OWASP Dependency Check: ${e.message}"
+                        currentBuild.result = 'FAILURE'
+                        throw e
+                    }
+                }
+            }
+        }
 
         stage('Dockerize') {
             steps {
